@@ -1,0 +1,50 @@
+<section class="mx-auto max-w-6xl px-4 py-10">
+  <header class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-sm font-medium text-blue-600">FCIS · Ain Shams University</p>
+      <h1 class="text-3xl font-semibold tracking-tight">Find a room or lab</h1>
+    </div>
+    <input
+      hlmInput
+      #q
+      (keyup.enter)="search(q.value)"
+      placeholder="Search by name, building…"
+      class="h-12 w-full rounded-2xl border-0 bg-white px-5 shadow-md shadow-slate-900/5 sm:w-80"
+    />
+  </header>
+
+  @if (error()) {
+    <div class="rounded-2xl bg-red-50 p-5 text-sm text-red-700 shadow-sm">{{ error() }}</div>
+  } @else if (loading()) {
+    <p class="text-sm text-slate-500">Loading facilities…</p>
+  } @else {
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      @for (f of facilities(); track f.id) {
+        <div hlmCard class="rounded-3xl border-0 bg-white shadow-lg shadow-slate-900/5 transition hover:-translate-y-0.5 hover:shadow-xl">
+          <div hlmCardHeader>
+            <h3 hlmCardTitle>{{ f.title }}</h3>
+            <p hlmCardDescription>{{ f.building }} · {{ f.location }}</p>
+          </div>
+          <div hlmCardContent class="flex items-center gap-2">
+            <span hlmBadge variant="secondary">{{ f.type }}</span>
+            <span hlmBadge variant="outline">{{ f.capacity }} seats</span>
+            @if (f.status === 'Maintenance') {
+              <span hlmBadge variant="destructive">Maintenance</span>
+            }
+          </div>
+          <div hlmCardFooter>
+            <button
+              hlmBtn
+              [disabled]="f.status === 'Maintenance'"
+              class="w-full rounded-2xl bg-gradient-to-b from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30 transition hover:shadow-xl"
+            >
+              Book
+            </button>
+          </div>
+        </div>
+      } @empty {
+        <p class="text-sm text-slate-500">No facilities match your search.</p>
+      }
+    </div>
+  }
+</section>

@@ -1,0 +1,15 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.6.4">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UserSecretsId>smartcampus-apphost</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\Shared.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\Gateway\Gateway.csproj" />
+    <ProjectReference Include="..\AuthService\AuthService.csproj" />
+    <ProjectReference Include="..\FacilityCatalog\FacilityCatalog.csproj" />
+    <ProjectReference Include="..\BookingEngine\BookingEngine.csproj" />
+    <ProjectReference Include="..\NotificationService\NotificationService.csproj" />
+  </ItemGroup>
+</Project>
