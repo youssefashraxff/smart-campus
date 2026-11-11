@@ -15,18 +15,19 @@ Angular (4200) ──HTTP──▶ API Gateway (5000) ──▶ Auth Service    
                                                 PostgreSQL (campusdb)
 ```
 
-| Project                           | Purpose                                                                                |
-| --------------------------------- | -------------------------------------------------------------------------------------- |
-| `src/Gateway`                     | Single entry point: YARP pass-through routes + aggregated endpoints (`/api/dashboard`) |
-| `src/AuthService`                 | Registration, login, roles (Student, Faculty, Admin)                                   |
-| `src/FacilityCatalog`             | Facilities, equipment, events, speakers, search                                        |
-| `src/BookingEngine`               | Reservations with overlap checks, event registrations                                  |
-| `src/NotificationService`         | Email + dashboard alerts                                                               |
-| `src/Shared`                      | Contracts and service names reused across services                                     |
-| `src/SmartCampus.ServiceDefaults` | Health checks, telemetry, service discovery, resilient HttpClients                     |
-| `src/SmartCampus.AppHost`         | .NET Aspire: starts everything with one command                                        |
-| `frontend`                        | Angular 22 + Tailwind CSS 4 + Spartan/ng + FullCalendar                                |
-| `db`                              | `schema.sql` (reference) and `seed.sql` (initial FCIS data)                            |
+| Project | Purpose |
+| --- | --- |
+| `src/Gateway` | Single entry point: YARP pass-through routes + aggregated endpoints (`/api/dashboard`) |
+| `src/AuthService` | Registration, login, roles (Student, Faculty, Admin) |
+| `src/FacilityCatalog` | Facilities, equipment, events, speakers, search |
+| `src/BookingEngine` | Reservations with overlap checks, event registrations |
+| `src/NotificationService` | Email + dashboard alerts |
+| `src/Shared` | Contracts and service names reused across services |
+| `src/SmartCampus.ServiceDefaults` | Health checks, telemetry, service discovery, resilient HttpClients |
+| `src/SmartCampus.AppHost` | .NET Aspire: starts everything with one command |
+| `frontend` | Angular 22 + Tailwind CSS 4 + Spartan/ng + FullCalendar |
+| `db` | `schema.sql` (reference) and `seed.sql` (initial FCIS data) |
+| `docs` | `SRS.md`, the requirements every feature maps to |
 
 ## Prerequisites (macOS, Apple Silicon)
 
@@ -68,16 +69,14 @@ Each service also runs on its own (`dotnet run --project src/FacilityCatalog`) w
 
 ## Dev accounts (from `db/seed.sql`)
 
-| Role    | Email                             | Password      |
-| ------- | --------------------------------- | ------------- |
-| Admin   | `facilities.admin@cis.asu.edu.eg` | `Admin@2026`  |
-| Faculty | `mona.abdelaziz@cis.asu.edu.eg`   | `Campus@2026` |
-| Student | `ahmed.mostafa@cis.asu.edu.eg`    | `Campus@2026` |
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `facilities.admin@cis.asu.edu.eg` | `Admin@2026` |
+| Faculty | `mona.abdelaziz@cis.asu.edu.eg` | `Campus@2026` |
+| Student | `ahmed.mostafa@cis.asu.edu.eg` | `Campus@2026` |
 
 ## Status
 
-Implemented: service structure, gateway routing and dashboard aggregation, CORS, facility/event
-search, booking creation with transactional overlap check, booking cancel, notifications list/read,
-register/login with BCrypt. Until JWT is added, the caller's user id is passed in an `X-User-Id` header.
-
-Remaining work is tracked in ClickUp (space **Smart Campus**).
+Skeleton only: projects, folders, ports, configuration, database scripts and the Angular + Tailwind + Spartan
+setup are in place; no feature code yet. Requirements are in `docs/SRS.md`, conventions for AI-assisted work in
+`CLAUDE.md`, and the task backlog in ClickUp (space **Smart Campus**).
