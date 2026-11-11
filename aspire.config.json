@@ -1,0 +1,5 @@
+{
+    "appHost": {
+        "path": "src/SmartCampus.AppHost/SmartCampus.AppHost.csproj"
+    }
+}
