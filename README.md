@@ -18,10 +18,10 @@ Angular (4200) ──HTTP──▶ API Gateway (5000) ──▶ Auth Service    
 | Module | Purpose |
 | --- | --- |
 | `gateway` | Single entry point: forwards `/api/**` to the right service (later: aggregation, JWT, CORS) |
-| `auth-service` | Registration, login, roles (Student, Faculty, Admin) |
-| `facility-catalog` | Facilities, equipment, events, speakers, search |
-| `booking-engine` | Reservations with overlap checks, event registrations |
-| `notification-service` | Email + dashboard alerts |
+| `services/auth-service` | Registration, login, roles (Student, Faculty, Admin) |
+| `services/facility-catalog` | Facilities, equipment, events, speakers, search |
+| `services/booking-engine` | Reservations with overlap checks, event registrations |
+| `services/notification-service` | Email + dashboard alerts |
 | `shared` | Contracts and service names reused across services |
 | `frontend` | Angular 22 + Tailwind CSS 4 + Spartan/ng + FullCalendar |
 | `db` | `schema.sql` (reference) and `seed.sql` (initial FCIS data) |
@@ -29,8 +29,10 @@ Angular (4200) ──HTTP──▶ API Gateway (5000) ──▶ Auth Service    
 
 ### Inside each service
 
+The four services live in `services/`; `gateway` and `shared` stay at the root because they aren't services.
+
 ```
-booking-engine/
+services/booking-engine/
 ├── pom.xml                                   ← libraries this service needs
 └── src/main/
     ├── java/com/smartcampus/booking/
@@ -70,7 +72,7 @@ booking-engine/
    ```
 4. **Run a service.** Open its `*Application.java` in VS Code and click **Run**, or:
    ```bash
-   mvn -pl booking-engine spring-boot:run
+   mvn -pl services/booking-engine spring-boot:run
    ```
    On startup Flyway runs any new files in that service's `db/migration` folder.
 5. **Seed data.** Once the migrations have created the tables, run `db/seed.sql` in TablePlus

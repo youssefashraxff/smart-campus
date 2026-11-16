@@ -26,10 +26,10 @@
     <modules>
         <module>shared</module>
         <module>gateway</module>
-        <module>auth-service</module>
-        <module>facility-catalog</module>
-        <module>booking-engine</module>
-        <module>notification-service</module>
+        <module>services/auth-service</module>
+        <module>services/facility-catalog</module>
+        <module>services/booking-engine</module>
+        <module>services/notification-service</module>
     </modules>
 
     <properties>

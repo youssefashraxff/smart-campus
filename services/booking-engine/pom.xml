@@ -8,6 +8,8 @@
         <groupId>com.smartcampus</groupId>
         <artifactId>smart-campus</artifactId>
         <version>0.1.0</version>
+        <!-- the root pom.xml is two folders up (services/<this-service>/) -->
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>booking-engine</artifactId>
