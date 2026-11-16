@@ -1,11 +1,14 @@
-# .NET
-bin/
-obj/
-*.user
-*.suo
-.vs/
-*.DotSettings.user
-appsettings.*.local.json
+# Java / Maven
+target/
+*.class
+# Local secrets (real DB password) — copy application-local.yml.example
+application-local.yml
+
+# IDE project files
+.classpath
+.project
+.settings/
+.factorypath
 
 # Node / Angular
 node_modules/

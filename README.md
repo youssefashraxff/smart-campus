@@ -8,64 +8,77 @@ workshops and track their reservations. Every function is a REST web service beh
 
 ```
 Angular (4200) ──HTTP──▶ API Gateway (5000) ──▶ Auth Service          (5001)
-                         YARP routing           Facility Catalog      (5002)
-                         aggregation            Booking Engine        (5003)
-                         CORS · JWT             Notification Service  (5004)
+                         Spring Cloud Gateway   Facility Catalog      (5002)
+                         routing                Booking Engine        (5003)
+                                                Notification Service  (5004)
                                                         │
                                                 PostgreSQL (campusdb)
 ```
 
-| Project | Purpose |
+| Module | Purpose |
 | --- | --- |
-| `src/Gateway` | Single entry point: YARP pass-through routes + aggregated endpoints (`/api/dashboard`) |
-| `src/AuthService` | Registration, login, roles (Student, Faculty, Admin) |
-| `src/FacilityCatalog` | Facilities, equipment, events, speakers, search |
-| `src/BookingEngine` | Reservations with overlap checks, event registrations |
-| `src/NotificationService` | Email + dashboard alerts |
-| `src/Shared` | Contracts and service names reused across services |
-| `src/SmartCampus.ServiceDefaults` | Health checks, telemetry, service discovery, resilient HttpClients |
-| `src/SmartCampus.AppHost` | .NET Aspire: starts everything with one command |
+| `gateway` | Single entry point: forwards `/api/**` to the right service (later: aggregation, JWT, CORS) |
+| `auth-service` | Registration, login, roles (Student, Faculty, Admin) |
+| `facility-catalog` | Facilities, equipment, events, speakers, search |
+| `booking-engine` | Reservations with overlap checks, event registrations |
+| `notification-service` | Email + dashboard alerts |
+| `shared` | Contracts and service names reused across services |
 | `frontend` | Angular 22 + Tailwind CSS 4 + Spartan/ng + FullCalendar |
 | `db` | `schema.sql` (reference) and `seed.sql` (initial FCIS data) |
 | `docs` | `SRS.md`, the requirements every feature maps to |
 
+### Inside each service
+
+```
+booking-engine/
+├── pom.xml                                   ← libraries this service needs
+└── src/main/
+    ├── java/com/smartcampus/booking/
+    │   ├── BookingEngineApplication.java     ← entry point (starts the server)
+    │   ├── controller/                       ← @RestController classes (endpoints)
+    │   ├── entity/                           ← @Entity classes (one per table)
+    │   └── repository/                       ← JpaRepository interfaces
+    └── resources/
+        ├── application.yml                   ← port, database URL, Flyway settings
+        ├── application-local.yml.example     ← template for your local DB password
+        └── db/migration/                     ← Flyway SQL files: V1__create_bookings.sql, ...
+```
+
+## Stack
+
+- Java 21, Spring Boot 4.1 (Spring Web MVC, Spring Data JPA / Hibernate, Flyway)
+- Spring Cloud Gateway (2025.1 release train) for the gateway
+- Maven multi-module build (root `pom.xml`)
+- PostgreSQL 17, native on macOS (no Docker)
+
 ## Prerequisites (macOS, Apple Silicon)
 
-- .NET 10 SDK: `brew install --cask dotnet-sdk`
-- Aspire CLI: `curl -sSL https://aspire.dev/install.sh | bash`
-- EF Core tools: `dotnet tool install --global dotnet-ef`
+- Java 21: `brew install openjdk@21`
+- Maven: `brew install maven`
 - PostgreSQL 17: `brew install postgresql@17 && brew services start postgresql@17`
+- VS Code extensions: **Extension Pack for Java** and **Spring Boot Extension Pack**
 - Node.js 22+ for the frontend
 
 ## First run
 
-1. **Database.** Create the database once (`psql postgres`, then `CREATE DATABASE campusdb;`), then replace `postgres@123` with your PostgreSQL password in:
-   - `src/SmartCampus.AppHost/appsettings.json` (used when running through Aspire)
-   - each service's `appsettings.Development.json` (used when running a service alone)
-2. **Build.**
+1. **Database.** Create it once: `psql postgres`, then `CREATE DATABASE campusdb;`
+2. **Password.** In each service's `src/main/resources/`, copy `application-local.yml.example` to
+   `application-local.yml` and put your Postgres password in it. That file is git-ignored.
+3. **Build everything** from the repo root:
    ```bash
-   dotnet build SmartCampus.slnx
+   mvn clean install
    ```
-3. **Create the tables** (one migration per service, each with its own history table):
+4. **Run a service.** Open its `*Application.java` in VS Code and click **Run**, or:
    ```bash
-   for s in AuthService FacilityCatalog BookingEngine NotificationService; do
-     dotnet ef migrations add Initial --project src/$s
-     dotnet ef database update --project src/$s
-   done
+   mvn -pl booking-engine spring-boot:run
    ```
-4. **Seed data.** Run `db/seed.sql` in TablePlus (or `psql -d campusdb -f db/seed.sql`).
-5. **Start the backend.**
-   ```bash
-   aspire run          # or: dotnet run --project src/SmartCampus.AppHost
-   ```
-   The Aspire dashboard opens with every service, its logs and traces.
+   On startup Flyway runs any new files in that service's `db/migration` folder.
+5. **Seed data.** Once the migrations have created the tables, run `db/seed.sql` in TablePlus
+   (or `psql -d campusdb -f db/seed.sql`).
 6. **Start the frontend.**
    ```bash
    cd frontend && npm install && npm start   # http://localhost:4200
    ```
-
-Each service also runs on its own (`dotnet run --project src/FacilityCatalog`) with Swagger at
-`http://localhost:<port>/swagger`.
 
 ## Dev accounts (from `db/seed.sql`)
 
@@ -77,6 +90,6 @@ Each service also runs on its own (`dotnet run --project src/FacilityCatalog`) w
 
 ## Status
 
-Skeleton only: projects, folders, ports, configuration, database scripts and the Angular + Tailwind + Spartan
+Skeleton only: modules, folders, ports, configuration, database scripts and the Angular + Tailwind + Spartan
 setup are in place; no feature code yet. Requirements are in `docs/SRS.md`, conventions for AI-assisted work in
 `CLAUDE.md`, and the task backlog in ClickUp (space **Smart Campus**).
