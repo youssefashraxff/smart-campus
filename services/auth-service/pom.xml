@@ -16,6 +16,12 @@
     <name>Auth Service</name>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- Web server + @RestController (C#: ASP.NET Core Web API) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -40,6 +46,12 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
+        </dependency>
+        <!-- Lombok: @Getter writes the getter methods at compile time (no version: set by Spring Boot) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.smartcampus</groupId>

@@ -41,6 +41,12 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <!-- Lombok: @Getter writes the getter methods at compile time (no version: set by Spring Boot) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>com.smartcampus</groupId>
             <artifactId>shared</artifactId>

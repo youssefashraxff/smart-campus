@@ -1,4 +1,4 @@
-# Gateway configuration: the only port the Angular frontend talks to
+# Gateway configuration: the only port the Angular frontend talks to (FR-C1)
 server:
   port: 5000
 
@@ -9,13 +9,42 @@ spring:
     gateway:
       server:
         webflux:
-          # Add one route per service as you build it. Each route sends matching paths
-          # to that service's port. Example for the Booking Engine:
-          #
-          #   - id: bookings
-          #     uri: http://localhost:5003
-          #     predicates:
-          #       - Path=/api/bookings/**
-          #
-          # Ports: auth 5001 · catalog 5002 · bookings 5003 · notifications 5004
-          routes: []
+          # CORS for the Angular dev server (FR-C4, NFR-5). Only this origin may call the API from a browser.
+          globalcors:
+            cors-configurations:
+              "[/**]":
+                allowed-origins: http://localhost:4200
+                allowed-methods: GET, POST, PUT, DELETE, OPTIONS
+                allowed-headers: "*"
+
+          # One route per service (FR-C2). The ports match server.port in each service's application.yml.
+          # Paths are forwarded unchanged (no StripPrefix), so the services' controllers use the same
+          # /api/... paths as SRS section 5, e.g. @RequestMapping("/api/bookings").
+          # "/api/facilities/**" also matches "/api/facilities" itself.
+          routes:
+            # services/auth-service (port 5001): register, login, current user
+            - id: auth-service
+              uri: http://localhost:5001
+              predicates:
+                - Path=/api/auth/**
+
+            # services/facility-catalog (port 5002): facilities, events, speakers
+            - id: facility-catalog
+              uri: http://localhost:5002
+              predicates:
+                - Path=/api/facilities/**, /api/events/**
+
+            # services/booking-engine (port 5003): facility bookings and event registrations
+            - id: booking-engine
+              uri: http://localhost:5003
+              predicates:
+                - Path=/api/bookings/**, /api/registrations/**
+
+            # services/notification-service (port 5004): user alerts
+            - id: notification-service
+              uri: http://localhost:5004
+              predicates:
+                - Path=/api/notifications/**
+
+          # Not routes: /api/dashboard and /api/facilities/{id}/availability are aggregated endpoints
+          # (FR-C3) that the gateway answers itself in Java, by calling several services.

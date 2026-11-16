@@ -1,0 +1,53 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Auth Service (5001)",
+      "request": "launch",
+      "mainClass": "com.smartcampus.auth.AuthServiceApplication",
+      "projectName": "auth-service"
+    },
+    {
+      "type": "java",
+      "name": "Facility Catalog (5002)",
+      "request": "launch",
+      "mainClass": "com.smartcampus.catalog.FacilityCatalogApplication",
+      "projectName": "facility-catalog"
+    },
+    {
+      "type": "java",
+      "name": "Booking Engine (5003)",
+      "request": "launch",
+      "mainClass": "com.smartcampus.booking.BookingEngineApplication",
+      "projectName": "booking-engine"
+    },
+    {
+      "type": "java",
+      "name": "Notification Service (5004)",
+      "request": "launch",
+      "mainClass": "com.smartcampus.notification.NotificationServiceApplication",
+      "projectName": "notification-service"
+    },
+    {
+      "type": "java",
+      "name": "Gateway (5000)",
+      "request": "launch",
+      "mainClass": "com.smartcampus.gateway.GatewayApplication",
+      "projectName": "gateway"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "All services",
+      "configurations": [
+        "Auth Service (5001)",
+        "Facility Catalog (5002)",
+        "Booking Engine (5003)",
+        "Notification Service (5004)",
+        "Gateway (5000)"
+      ],
+      "stopAll": true
+    }
+  ]
+}
