@@ -8,10 +8,12 @@
         <groupId>com.smartcampus</groupId>
         <artifactId>smart-campus</artifactId>
         <version>0.1.0</version>
+        <!-- the root pom.xml is two folders up (services/<this-service>/) -->
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>auth-service</artifactId>
-    <name>Auth Service</name>
+    <artifactId>facility-catalog</artifactId>
+    <name>Facility Catalog</name>
 
     <dependencies>
         <!-- Web server + @RestController (C#: ASP.NET Core Web API) -->

@@ -12,7 +12,7 @@ and explain non-obvious decisions in your summary.
 - Java 21, Spring Boot 4.1, Maven multi-module build (root `pom.xml`, versions set only there)
 - Spring Web MVC with `@RestController` classes
 - Spring Data JPA (Hibernate) + PostgreSQL JDBC driver on native PostgreSQL 17, database `campusdb` (no Docker anywhere)
-- Flyway for migrations: hand-written SQL in `<service>/src/main/resources/db/migration/V<n>__<description>.sql`
+- Flyway for migrations: hand-written SQL in `services/<service>/src/main/resources/db/migration/V<n>__<description>.sql`
 - Spring Cloud Gateway (WebFlux server, release train 2025.1) in `gateway`
 - Angular 22 (standalone components, signals, zoneless) + Tailwind CSS 4 + Spartan/ng helm components in
   `frontend/libs/ui` (add more with `npx ng g @spartan-ng/cli:ui <name>`) + FullCalendar 7 (`fullcalendar`, `@fullcalendar/angular`)
@@ -22,10 +22,10 @@ and explain non-obvious decisions in your summary.
 | Module | Port | Base package | Flyway history table |
 | --- | --- | --- | --- |
 | gateway | 5000 | `com.smartcampus.gateway` | — |
-| auth-service | 5001 | `com.smartcampus.auth` | `flyway_history_auth` |
-| facility-catalog | 5002 | `com.smartcampus.catalog` | `flyway_history_catalog` |
-| booking-engine | 5003 | `com.smartcampus.booking` | `flyway_history_booking` |
-| notification-service | 5004 | `com.smartcampus.notification` | `flyway_history_notification` |
+| services/auth-service | 5001 | `com.smartcampus.auth` | `flyway_history_auth` |
+| services/facility-catalog | 5002 | `com.smartcampus.catalog` | `flyway_history_catalog` |
+| services/booking-engine | 5003 | `com.smartcampus.booking` | `flyway_history_booking` |
+| services/notification-service | 5004 | `com.smartcampus.notification` | `flyway_history_notification` |
 | shared | — | `com.smartcampus.shared` | — |
 
 Each service has `controller/`, `entity/` and `repository/` packages. Ports and DB settings are in each
