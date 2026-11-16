@@ -28,11 +28,11 @@ application (the gateway). Out of scope: payments, mobile apps, real university 
 
 | Component | Technology |
 | --- | --- |
-| Backend services + gateway | C# on .NET 10, ASP.NET Core Web API (REST, controllers) |
+| Backend services + gateway | Java 21, Spring Boot 4.1 (Spring Web MVC, REST controllers); Spring Cloud Gateway |
 | Frontend | Angular 22 (standalone, zoneless) + Tailwind CSS 4 + Spartan/ng; FullCalendar 7 for the booking calendar |
-| Database | PostgreSQL 17 via Entity Framework Core (Npgsql) |
-| Local orchestration | .NET Aspire AppHost |
-| Dev machine | macOS Apple Silicon, VS Code + C# Dev Kit, no Docker |
+| Database | PostgreSQL 17 via Spring Data JPA (Hibernate); schema managed by Flyway migrations |
+| Build | Maven multi-module (one module per service) |
+| Dev machine | macOS Apple Silicon, VS Code + Extension Pack for Java + Spring Boot Extension Pack, no Docker |
 
 ### 2.3 Constraints
 
@@ -45,7 +45,7 @@ application (the gateway). Out of scope: payments, mobile apps, real university 
 
 ```
 Angular (4200) ──HTTP + JWT──▶ API Gateway (5000) ──REST/JSON──▶ AuthService          (5001)
-                               YARP routing                     FacilityCatalog      (5002)
+                               Spring Cloud Gateway             FacilityCatalog      (5002)
                                aggregation                      BookingEngine        (5003) ──▶ NotificationService
                                JWT validation, CORS             NotificationService  (5004)
                                                                         │
@@ -54,16 +54,14 @@ Angular (4200) ──HTTP + JWT──▶ API Gateway (5000) ──REST/JSON─�
 
 | Project | Port | Responsibility |
 | --- | --- | --- |
-| Gateway | 5000 | Single entry point: YARP routing, aggregated endpoints, JWT validation, CORS |
+| Gateway | 5000 | Single entry point: Spring Cloud Gateway routing, aggregated endpoints, JWT validation, CORS |
 | AuthService | 5001 | Registration, login, JWT issuing, roles |
 | FacilityCatalog | 5002 | Facilities, equipment, events, speakers, search |
 | BookingEngine | 5003 | Reservations, registrations, conflict checks, calendar export |
 | NotificationService | 5004 | Email and dashboard alerts, reminders |
 | Shared | — | Service names and contracts reused by services and gateway |
-| SmartCampus.ServiceDefaults | — | Health checks, telemetry, service discovery, resilient HttpClients |
-| SmartCampus.AppHost | — | Aspire: starts everything with one command |
 
-Design decisions: one project/process per service; gateway as BFF; synchronous REST between services;
+Design decisions: one Maven module/process per service; gateway as BFF; synchronous REST between services;
 a service reads/writes only its own tables and gets other data through the owning service's API;
 relational DB for transactional double-booking protection.
 
@@ -110,7 +108,7 @@ relational DB for transactional double-booking protection.
 | ID | Requirement |
 | --- | --- |
 | FR-C1 | The gateway is the only entry point for the frontend |
-| FR-C2 | The gateway routes to the four services (YARP reverse proxy) |
+| FR-C2 | The gateway routes to the four services (Spring Cloud Gateway reverse proxy) |
 | FR-C3 | The gateway exposes aggregated endpoints combining several services (dashboard, facility availability) |
 | FR-C4 | The gateway validates the JWT and applies CORS for the Angular origin |
 
@@ -148,8 +146,9 @@ Errors: 400 invalid input · 401 missing/invalid JWT · 403 wrong role · 404 no
 
 ## 6. Data model
 
-Seven entities; table and column names match `db/schema.sql` exactly (EF Core Npgsql defaults: PascalCase,
-table name = DbSet name). Enums stored as strings.
+Seven entities; table and column names match `db/schema.sql` exactly (snake_case, Hibernate's default naming;
+plural table names set with `@Table`). Enums stored as strings. Attributes below use the Java field names
+(`StartTime` → field `startTime` → column `start_time`).
 
 | Entity (table) | Attributes | Owner |
 | --- | --- | --- |
@@ -169,13 +168,13 @@ FK and are validated through the owning service's API.
 | ID | Attribute | Requirement |
 | --- | --- | --- |
 | NFR-1 | Reusability | Each service has its own project, port and OpenAPI contract, usable without the gateway |
-| NFR-2 | Modifiability | Frontend depends only on gateway paths; DB provider swappable via EF Core |
+| NFR-2 | Modifiability | Frontend depends only on gateway paths; DB provider swappable via JPA (change JDBC driver + URL) |
 | NFR-3 | Performance | Search/dashboard < 500 ms at the gateway for 50 concurrent users; aggregation calls run in parallel |
 | NFR-4 | Availability | Notification failure must not fail a booking; gateway returns 503 when a required service is down |
 | NFR-5 | Security | BCrypt hashes, JWT on protected endpoints, role-checked admin endpoints, CORS limited to Angular origin |
 | NFR-6 | Data integrity | No double booking, enforced in a DB transaction |
 | NFR-7 | Usability | Responsive UI (desktop and mobile widths) |
-| NFR-8 | Observability | Logs and traces visible in the Aspire dashboard |
+| NFR-8 | Observability | Each service logs requests and errors to its console |
 
 ## 8. Bonus
 

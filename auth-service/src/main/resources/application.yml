@@ -1,0 +1,26 @@
+# Auth Service configuration (C#: appsettings.json)
+server:
+  port: 5001
+
+spring:
+  application:
+    name: auth-service
+  # Your real database password goes in application-local.yml next to this file
+  # (git-ignored; copy application-local.yml.example). Never commit it.
+  config:
+    import: optional:classpath:application-local.yml
+  datasource:
+    url: jdbc:postgresql://localhost:5432/campusdb
+    username: postgres
+    password: CHANGE_ME
+  jpa:
+    hibernate:
+      # Flyway creates the tables; Hibernate only checks that the @Entity classes match them
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    # Own history table per service, because all four services share campusdb
+    table: flyway_history_auth
+    # campusdb already has the other services' tables, so start the history from version 0
+    baseline-on-migrate: true
+    baseline-version: 0

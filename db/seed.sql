@@ -5,18 +5,18 @@
 --          All event and booking days fall Sunday–Thursday (Egyptian working week).
 --
 -- People are sample accounts (realistic names, not real individuals).
--- Dev passwords (BCrypt, cost 11 — verify with BCrypt.Net-Next):
+-- Dev passwords (BCrypt, cost 11 — verify with Spring Security's BCryptPasswordEncoder):
 --   Admins:            Admin@2026
 --   Students, faculty: Campus@2026
 --
--- Run order: schema (or EF Core migrations) first, then this file.
+-- Run order: schema (or the services' Flyway migrations) first, then this file.
 
 BEGIN;
 
 -- ============================================================
 -- Auth service: Users
 -- ============================================================
-INSERT INTO "Users" ("Id","Name","UniversityId","Email","PasswordHash","Role","CreatedAt") VALUES
+INSERT INTO users (id,name,university_id,email,password_hash,role,created_at) VALUES
 -- Admins
 ( 1,'Facilities Office Admin',        'ADM-001',   'facilities.admin@cis.asu.edu.eg','$2b$11$LyjSEbpVtvpqWWmdOZ3szuXi.1tTXgjVHlFWoQjIIcI0PbCFJVNFe','Admin',  '2026-09-01 09:00+02'),
 ( 2,'Student Activities Admin',       'ADM-002',   'activities.admin@cis.asu.edu.eg','$2b$11$LyjSEbpVtvpqWWmdOZ3szuXi.1tTXgjVHlFWoQjIIcI0PbCFJVNFe','Admin',  '2026-09-01 09:05+02'),
@@ -40,7 +40,7 @@ INSERT INTO "Users" ("Id","Name","UniversityId","Email","PasswordHash","Role","C
 -- ============================================================
 -- Facility Catalog service: Facilities
 -- ============================================================
-INSERT INTO "Facilities" ("Id","Title","Building","Location","Capacity","Type","Status") VALUES
+INSERT INTO facilities (id,title,building,location,capacity,type,status) VALUES
 ( 1,'Lecture Hall 1',                      'FCIS Building A','Ground floor',                      300,'Room',     'Available'),
 ( 2,'Lecture Hall 2',                      'FCIS Building A','Ground floor, east wing',           250,'Room',     'Available'),
 ( 3,'Seminar Room A-201',                  'FCIS Building A','2nd floor',                          40,'Room',     'Available'),
@@ -60,7 +60,7 @@ INSERT INTO "Facilities" ("Id","Title","Building","Location","Capacity","Type","
 -- ============================================================
 -- Facility Catalog service: Events (independent of Facilities)
 -- ============================================================
-INSERT INTO "Events" ("Id","Title","Description","Category","Building","Location","StartTime","EndTime","Capacity","Status") VALUES
+INSERT INTO events (id,title,description,category,building,location,start_time,end_time,capacity,status) VALUES
 ( 1,'Welcome Back Orientation',
     'Faculty orientation for new and returning students: academic regulations, the credit-hour system, student activities and campus services.',
     'Social','FCIS Building A','Lecture Hall 1','2026-10-05 10:00+02','2026-10-05 13:00+02',300,'Scheduled'),
@@ -101,7 +101,7 @@ INSERT INTO "Events" ("Id","Title","Description","Category","Building","Location
 -- ============================================================
 -- Facility Catalog service: Speakers (one row per speaker per event)
 -- ============================================================
-INSERT INTO "Speakers" ("Id","EventId","Name","Affiliation","Bio") VALUES
+INSERT INTO speakers (id,event_id,name,affiliation,bio) VALUES
 ( 1, 1,'Dr. Hesham Kamal',   'Head of Student Activities Committee, FCIS',     'Faculty member coordinating student clubs and orientation programs.'),
 ( 2, 2,'Eng. Nourhan Samir', 'Teaching Assistant, FCIS',                       'Teaches the Operating Systems lab sessions and maintains the faculty''s Linux lab images.'),
 ( 3, 3,'Eng. Omar Fathy',    'Senior Software Engineer, FCIS alumnus (2019)',  'Works on backend platforms; leads code-review practices in his team.'),
@@ -122,7 +122,7 @@ INSERT INTO "Speakers" ("Id","EventId","Name","Affiliation","Bio") VALUES
 -- #4/#5 are back-to-back (edge case: touching, not overlapping).
 -- #9 is cancelled, so #10 may take an overlapping slot.
 -- ============================================================
-INSERT INTO "Bookings" ("Id","UserId","FacilityId","StartTime","EndTime","Status","CreatedAt") VALUES
+INSERT INTO bookings (id,user_id,facility_id,start_time,end_time,status,created_at) VALUES
 ( 1, 7, 4,'2026-11-02 10:00+02','2026-11-02 12:00+02','Confirmed','2026-10-29 21:14+02'),
 ( 2, 3, 6,'2026-11-04 09:00+02','2026-11-04 11:00+02','Confirmed','2026-10-27 10:02+02'),
 ( 3, 8,11,'2026-11-09 14:00+02','2026-11-09 16:00+02','Confirmed','2026-11-05 17:40+02'),
@@ -143,7 +143,7 @@ INSERT INTO "Bookings" ("Id","UserId","FacilityId","StartTime","EndTime","Status
 -- ============================================================
 -- Booking Engine service: Registrations
 -- ============================================================
-INSERT INTO "Registrations" ("Id","UserId","EventId","Status","CreatedAt") VALUES
+INSERT INTO registrations (id,user_id,event_id,status,created_at) VALUES
 ( 1, 7, 1,'Registered','2026-09-28 12:00+02'),
 ( 2, 8, 1,'Registered','2026-09-28 13:10+02'),
 ( 3, 9, 1,'Registered','2026-09-29 09:45+02'),
@@ -182,7 +182,7 @@ INSERT INTO "Registrations" ("Id","UserId","EventId","Status","CreatedAt") VALUE
 -- ============================================================
 -- Notification service: Notifications
 -- ============================================================
-INSERT INTO "Notifications" ("Id","UserId","Type","Message","IsRead","CreatedAt") VALUES
+INSERT INTO notifications (id,user_id,type,message,is_read,created_at) VALUES
 ( 1, 7,'Reminder',      'Reminder: Study Room A-305 (FCIS Building A) is booked for you tomorrow, Mon 2 Nov, 10:00–12:00.',                        TRUE, '2026-11-01 10:00+02'),
 ( 2, 3,'Confirmation',  'Your booking for Computer Lab 1 (General Purpose) on Wed 4 Nov, 09:00–11:00 is confirmed.',                               TRUE, '2026-10-27 10:02+02'),
 ( 3, 9,'Confirmation',  'Your booking for Study Room A-305 on Mon 16 Nov, 10:00–12:00 is confirmed.',                                              TRUE, '2026-11-08 22:31+02'),
@@ -200,12 +200,12 @@ INSERT INTO "Notifications" ("Id","UserId","Type","Message","IsRead","CreatedAt"
 (15, 7,'Confirmation',  'You are registered for "Graduation Projects Mid-Year Showcase" on Tue 15 Dec, 10:00–14:00, Lecture Hall 1.',             FALSE,'2026-11-11 09:30+02');
 
 -- Move identity counters past the seeded IDs so new inserts don't collide
-SELECT setval(pg_get_serial_sequence('"Users"','Id'),         (SELECT MAX("Id") FROM "Users"));
-SELECT setval(pg_get_serial_sequence('"Facilities"','Id'),    (SELECT MAX("Id") FROM "Facilities"));
-SELECT setval(pg_get_serial_sequence('"Events"','Id'),        (SELECT MAX("Id") FROM "Events"));
-SELECT setval(pg_get_serial_sequence('"Speakers"','Id'),      (SELECT MAX("Id") FROM "Speakers"));
-SELECT setval(pg_get_serial_sequence('"Bookings"','Id'),      (SELECT MAX("Id") FROM "Bookings"));
-SELECT setval(pg_get_serial_sequence('"Registrations"','Id'), (SELECT MAX("Id") FROM "Registrations"));
-SELECT setval(pg_get_serial_sequence('"Notifications"','Id'), (SELECT MAX("Id") FROM "Notifications"));
+SELECT setval(pg_get_serial_sequence('users','id'),         (SELECT MAX(id) FROM users));
+SELECT setval(pg_get_serial_sequence('facilities','id'),    (SELECT MAX(id) FROM facilities));
+SELECT setval(pg_get_serial_sequence('events','id'),        (SELECT MAX(id) FROM events));
+SELECT setval(pg_get_serial_sequence('speakers','id'),      (SELECT MAX(id) FROM speakers));
+SELECT setval(pg_get_serial_sequence('bookings','id'),      (SELECT MAX(id) FROM bookings));
+SELECT setval(pg_get_serial_sequence('registrations','id'), (SELECT MAX(id) FROM registrations));
+SELECT setval(pg_get_serial_sequence('notifications','id'), (SELECT MAX(id) FROM notifications));
 
 COMMIT;
