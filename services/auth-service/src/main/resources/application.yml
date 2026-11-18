@@ -1,7 +1,9 @@
 # Auth Service configuration (C#: appsettings.json)
 server:
   port: 5001
-
+jwt:
+  secret: CHANGE_ME
+  expiration: 8h
 spring:
   application:
     name: auth-service

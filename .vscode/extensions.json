@@ -1,0 +1,6 @@
+{
+  // Use Red Hat's Java extension (it understands Lombok). The other two run their own
+  // Java compilers without Lombok and report false "package lombok does not exist" errors.
+  "recommendations": ["redhat.java", "vscjava.vscode-java-pack"],
+  "unwantedRecommendations": ["oracle.oracle-java", "georgewfraser.vscode-javac"]
+}
