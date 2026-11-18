@@ -1,5 +1,7 @@
 package com.smartcampus.auth.entity;
 
+import java.time.OffsetDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -9,13 +11,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import java.time.OffsetDateTime;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 // Maps the users table (V1__create_users.sql). Column names come from Hibernate's default
 // naming: field universityId -> column university_id.
 @Getter
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "users")
 public class User {
 
@@ -41,7 +45,14 @@ public class User {
     private Role role;
 
     private OffsetDateTime createdAt;
-
+    
+    public User(String name, String universityId, String email, String passwordHash, Role role) {
+        this.name = name;
+        this.universityId = universityId;
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.role = role;
+    }
     // Runs just before the first INSERT, so every new row gets a creation time
     @PrePersist
     void onCreate() {
