@@ -37,4 +37,26 @@ public class Facility {
 
     @Enumerated(EnumType.STRING)
     private FacilityStatus status;
+    
+protected Facility() {}   // required by JPA
+
+public Facility(String title, String building, String location,
+                Integer capacity, FacilityType type, FacilityStatus status) {
+    this.title = title;
+    this.building = building;
+    this.location = location;
+    this.capacity = capacity;
+    this.type = type;
+    this.status = status;
+}
+
+public void update(String title, String building, String location,
+                   Integer capacity, FacilityType type, FacilityStatus status) {
+    this.title = title;
+    this.building = building;
+    this.location = location;
+    this.capacity = capacity;
+    this.type = type;
+    this.status = status;
+}
 }
