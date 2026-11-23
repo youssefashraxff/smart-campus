@@ -37,4 +37,18 @@ public class Speaker {
 
     // TEXT column
     private String bio;
+        protected Speaker() {}   // required by JPA
+
+    public Speaker(Event event, String name, String affiliation, String bio) {
+        this.event = event;
+        this.name = name;
+        this.affiliation = affiliation;
+        this.bio = bio;
+    }
+
+    public void update(String name, String affiliation, String bio) {
+        this.name = name;
+        this.affiliation = affiliation;
+        this.bio = bio;
+    }
 }
