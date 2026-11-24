@@ -5,6 +5,8 @@ import com.smartcampus.booking.dto.RegistrationResponse;
 import com.smartcampus.booking.service.RegistrationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -28,5 +30,11 @@ public class RegistrationController {
     public RegistrationResponse register(@RequestHeader("X-User-Id") Integer userId,
                                          @Valid @RequestBody RegistrationRequest request) {
         return service.register(userId, request.eventId());
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)                       // 204
+    public void cancel(@RequestHeader("X-User-Id") Integer userId, @PathVariable Integer id) {
+        service.cancel(userId, id);
     }
 }

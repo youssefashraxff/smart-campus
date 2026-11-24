@@ -38,6 +38,11 @@ public class Booking {
 
     private OffsetDateTime createdAt;
 
+    // Soft delete: the row stays so it still shows in the user's past items
+    public void cancel() {
+        this.status = BookingStatus.Cancelled;
+    }
+
     @PrePersist
     void onCreate() {
         if (createdAt == null) {
