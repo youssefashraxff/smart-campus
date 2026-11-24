@@ -2,7 +2,7 @@ package com.smartcampus.catalog.service;
 
 import com.smartcampus.catalog.dto.FacilityRequest;
 import com.smartcampus.catalog.entity.Facility;
-import com.smartcampus.catalog.exception.NotFoundException;
+import com.smartcampus.shared.exception.NotFoundException;
 import com.smartcampus.catalog.repository.FacilityRepository;
 import com.smartcampus.shared.contracts.FacilityResponse;
 import org.springframework.stereotype.Service;

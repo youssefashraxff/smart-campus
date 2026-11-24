@@ -4,7 +4,7 @@ import com.smartcampus.catalog.dto.SpeakerRequest;
 import com.smartcampus.catalog.dto.SpeakerResponse;
 import com.smartcampus.catalog.entity.Event;
 import com.smartcampus.catalog.entity.Speaker;
-import com.smartcampus.catalog.exception.NotFoundException;
+import com.smartcampus.shared.exception.NotFoundException;
 import com.smartcampus.catalog.repository.EventRepository;
 import com.smartcampus.catalog.repository.SpeakerRepository;
 import java.util.List;

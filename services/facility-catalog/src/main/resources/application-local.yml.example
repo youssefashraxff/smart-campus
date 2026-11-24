@@ -1,4 +1,5 @@
+# Copy this file to application-local.yml (same folder) and put your real Postgres password in it.
+# application-local.yml is git-ignored, so the password never reaches GitHub.
 spring:
   datasource:
-    username: postgres
-    password: 
+    password: your-postgres-password

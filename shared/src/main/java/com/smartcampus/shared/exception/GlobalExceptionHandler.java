@@ -1,8 +1,7 @@
-package com.smartcampus.auth.exception;
+package com.smartcampus.shared.exception;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -14,9 +13,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-// Turns exceptions from any controller into RFC 9457 ProblemDetail JSON with the right status.
-// Extending ResponseEntityExceptionHandler also covers Spring's own errors (bad JSON,
-// unknown enum value, missing header) in the same format. The other services copy this class.
+// One error handler for every service: turns exceptions from any controller into
+// RFC 9457 ProblemDetail JSON with the SRS 5 status code. Extending ResponseEntityExceptionHandler
+// also covers Spring's own errors (bad JSON, unknown enum value, missing header) in the same format.
+//
+// It lives in shared, outside each service's base package, so component scanning does not find it.
+// Each service registers it with @Import(GlobalExceptionHandler.class) on its Application class.
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -42,8 +44,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem(HttpStatus.BAD_REQUEST, "Bad request", ex.getMessage());
     }
 
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ProblemDetail handleInvalidCredentials(InvalidCredentialsException ex) {
+    @ExceptionHandler(UnauthorizedException.class)
+    public ProblemDetail handleUnauthorized(UnauthorizedException ex) {
         return problem(HttpStatus.UNAUTHORIZED, "Unauthorized", ex.getMessage());
     }
 
@@ -55,13 +57,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ProblemDetail handleConflict(ConflictException ex) {
         return problem(HttpStatus.CONFLICT, "Conflict", ex.getMessage());
-    }
-
-    // Two registrations raced past the exists checks and the UNIQUE constraint stopped the second.
-    // The DB message names tables and constraints, so it is never sent to the client.
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ProblemDetail handleDataIntegrity(DataIntegrityViolationException ex) {
-        return problem(HttpStatus.CONFLICT, "Conflict", "Email or university ID is already registered");
     }
 
     private static ProblemDetail problem(HttpStatus status, String title, String detail) {
