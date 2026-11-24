@@ -139,7 +139,14 @@ JSON in/out. Admin = JWT with Admin role. All others except register/login need 
 | GET | /api/notifications/mine?unread=true | Dashboard alerts | User | FR-U9 |
 | PUT | /api/notifications/{id}/read | Mark read | User | FR-U10 |
 | GET | /api/dashboard | Gateway aggregation: upcoming bookings + unread alerts | User | FR-C3 |
-| GET | /api/facilities/{id}/availability?date= | Gateway aggregation: facility + that day's bookings | User | FR-C3 |
+| GET | /api/facilities/{id}/availability?from=&to= | Gateway aggregation: facility + its confirmed slots in that date range (one request per calendar view) | User | FR-C3 |
+
+**Availability range.** `from` and `to` are `YYYY-MM-DD` calendar dates in Africa/Cairo, both inclusive
+(a week view sends Saturday to Friday, a day view sends the same date twice). The gateway calls the Facility
+Catalog once and the Booking Engine once, in parallel, and returns
+`{ facility, from, to, bookedSlots: [{ startTime, endTime }] }`: confirmed bookings that overlap
+`[from 00:00, to + 1 day 00:00)`, each listed once, with no user ids. `to` before `from`, or a range over 31 days,
+is a 400.
 
 Errors: 400 invalid input · 401 missing/invalid JWT · 403 wrong role · 404 not found ·
 409 booking conflict / event full / already registered · 503 downstream service unavailable (gateway).

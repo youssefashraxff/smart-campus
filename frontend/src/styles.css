@@ -5,88 +5,389 @@
 
 @import '@spartan-ng/brain/hlm-tailwind-preset.css';
 
+/* Tailwind only generates classes it finds in these files */
+@source '../libs/ui';
+
+/*
+ * Smart Campus design tokens.
+ * Campus blue is the one brand colour (actions, focus, selection). Sun yellow is a small accent for
+ * "new" and "now" (unread dots, today's date). Everything else is neutral, so status colours stay readable.
+ * The "soft raised" look (SRS bonus) comes from the --shadow-* tokens: raised cards and primary buttons
+ * get layered shadows; tables and forms stay flat.
+ */
 :root {
   color-scheme: light;
 
   --font-sans:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
-    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
 
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --radius: 0.75rem;
+
+  /* Three tonal layers: sidebar (darkest) -> page -> white cards (lightest, raised) */
+  --background: oklch(0.965 0.007 250);
+  --foreground: oklch(0.21 0.03 262);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: var(--foreground);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --popover-foreground: var(--foreground);
+
+  /* Campus blue */
+  --primary: oklch(0.5 0.16 258);
+  --primary-foreground: oklch(0.99 0 0);
+  --brand-soft: oklch(0.95 0.03 258);
+  --brand-ink: oklch(0.38 0.13 260);
+
+  /* Sun yellow accent */
+  --sun: oklch(0.85 0.16 85);
+  --sun-soft: oklch(0.96 0.05 92);
+  --sun-ink: oklch(0.45 0.1 70);
+
+  --secondary: oklch(0.945 0.008 252);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.945 0.008 252);
+  --muted-foreground: oklch(0.5 0.025 258);
+  --accent: oklch(0.955 0.012 255);
+  --accent-foreground: var(--foreground);
+
+  --success: oklch(0.55 0.13 155);
+  --success-soft: oklch(0.95 0.04 155);
+  --warning: oklch(0.55 0.13 60);
+  --warning-soft: oklch(0.96 0.05 80);
+  --destructive: oklch(0.56 0.21 27);
+  --destructive-soft: oklch(0.96 0.03 27);
+
+  --border: oklch(0.905 0.012 255);
+  --input: oklch(0.88 0.012 255);
+  --ring: oklch(0.6 0.14 258);
+
+  --chart-1: var(--primary);
+  --chart-2: var(--sun);
+  --chart-3: var(--success);
+  --chart-4: var(--warning);
+  --chart-5: var(--destructive);
+  --sidebar: oklch(0.925 0.016 255);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: oklch(0.88 0.018 255);
+  /* Muted text on the darker sidebar, kept above 4.5:1 contrast */
+  --sidebar-muted: oklch(0.44 0.03 258);
+  --sidebar-ring: var(--ring);
+
+  /* Raised surfaces: a crisp contact shadow plus a soft ambient one */
+  --shadow-raised:
+    0 1px 2px oklch(0.3 0.05 260 / 0.06), 0 2px 6px -1px oklch(0.3 0.05 260 / 0.06),
+    0 10px 24px -12px oklch(0.3 0.05 260 / 0.14);
+  --shadow-raised-hover:
+    0 1px 2px oklch(0.3 0.05 260 / 0.07), 0 4px 10px -2px oklch(0.3 0.05 260 / 0.08),
+    0 18px 36px -14px oklch(0.3 0.05 260 / 0.2);
+  /* Primary buttons: a tinted shadow and a light top edge */
+  --shadow-primary:
+    inset 0 1px 0 oklch(1 0 0 / 0.22), 0 1px 2px oklch(0.4 0.14 258 / 0.3),
+    0 6px 16px -6px oklch(0.45 0.16 258 / 0.55);
+
+  /* Motion: strong ease-out for UI, iOS-like curve for drawers (see emil-design-eng) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-:root.dark {
-  color-scheme: dark;
-
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.984 0.003 247.858);
-  --sidebar-primary-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+@theme inline {
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-ink: var(--brand-ink);
+  --color-sun: var(--sun);
+  --color-sun-soft: var(--sun-soft);
+  --color-sun-ink: var(--sun-ink);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-destructive-soft: var(--destructive-soft);
+  --shadow-raised: var(--shadow-raised);
+  --shadow-raised-hover: var(--shadow-raised-hover);
+  --shadow-primary: var(--shadow-primary);
+  --ease-out-strong: var(--ease-out);
+  --ease-drawer: var(--ease-drawer);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    line-height: 1.5;
   }
+
+  /* Size-specific tracking: tighten large text, leave body text alone (typography-details, apple-design) */
+  h1,
+  h2 {
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  h3 {
+    letter-spacing: -0.01em;
+  }
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+  }
+
+  abbr,
+  .acronym {
+    font-variant-caps: all-small-caps;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+
+  /* Optically centre button labels on the cap height */
+  button,
+  [data-slot='button'],
+  [data-slot='badge'] {
+    text-box: trim-both cap alphabetic;
+  }
+
+  /* Times, capacities and counts line up in columns */
+  time,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* A raised surface: cards, panels, stat tiles */
+  .surface-raised {
+    background: var(--card);
+    border-radius: 1.25rem;
+    box-shadow: var(--shadow-raised);
+    outline: 1px solid oklch(0.3 0.05 260 / 0.05);
+    outline-offset: -1px;
+  }
+
+  /* A flat surface: tables, forms inside pages */
+  .surface-flat {
+    background: var(--card);
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+  }
+
+  /* Interactive raised card: lifts on hover (pointer devices only), presses on click */
+  .surface-interactive {
+    transition:
+      box-shadow 200ms ease,
+      transform 160ms var(--ease-out);
+  }
+  .surface-interactive:active {
+    transform: scale(0.985);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .surface-interactive:hover {
+      box-shadow: var(--shadow-raised-hover);
+    }
+  }
+
+  /* Card titles: at most two lines, the full text stays in the title attribute */
+  .clamp-2 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  .narrow {
+    hyphens: auto;
+  }
+
+  /* Native <select>, styled to match hlmInput */
+  .select-native {
+    appearance: none;
+    height: 2.5rem;
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid var(--input);
+    background-color: var(--card);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding: 0 2.25rem 0 0.875rem;
+    font-size: 0.875rem;
+    outline: none;
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+  .select-native:focus-visible {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px oklch(0.6 0.14 258 / 0.25);
+  }
+
+  /* Tabs that keep their width when the selected one turns bold (typography-details) */
+  .tab-label {
+    display: inline-grid;
+  }
+  .tab-label > *,
+  .tab-label::after {
+    grid-area: 1 / 1;
+  }
+  .tab-label::after {
+    content: attr(data-text);
+    font-weight: 600;
+    visibility: hidden;
+    height: 0;
+  }
+
+  /* Segmented filter chips (facility type, etc.) */
+  .filter-chip {
+    height: 2rem;
+    padding: 0 0.875rem;
+    border-radius: 0.6rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    transition:
+      background-color 150ms ease,
+      color 150ms ease,
+      box-shadow 150ms ease;
+  }
+  .filter-chip[aria-pressed='true'] {
+    background: var(--card);
+    color: var(--foreground);
+    font-weight: 600;
+    box-shadow: var(--shadow-raised);
+  }
+  .filter-chip:focus-visible {
+    outline: 3px solid oklch(0.6 0.14 258 / 0.4);
+    outline-offset: 1px;
+  }
+
+  /* A checkbox drawn as a switch: still a real checkbox for keyboards and screen readers */
+  .switch {
+    appearance: none;
+    width: 2.25rem;
+    height: 1.375rem;
+    border-radius: 999px;
+    background: var(--input);
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color 200ms var(--ease-out);
+  }
+  .switch::after {
+    content: '';
+    position: absolute;
+    top: 0.1875rem;
+    left: 0.1875rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 999px;
+    background: white;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+    transition: transform 200ms var(--ease-out);
+  }
+  .switch:checked {
+    background: var(--primary);
+  }
+  .switch:checked::after {
+    transform: translateX(0.875rem);
+  }
+  .switch:focus-visible {
+    outline: 3px solid oklch(0.6 0.14 258 / 0.4);
+    outline-offset: 2px;
+  }
+
+  /* Admin tables: flat, dense, easy to scan */
+  .admin-table {
+    width: 100%;
+    font-size: 0.875rem;
+    border-collapse: collapse;
+  }
+  .admin-table th {
+    text-align: start;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    background: var(--muted);
+    padding: 0.625rem 1rem;
+    white-space: nowrap;
+  }
+  .admin-table th.text-end {
+    text-align: end;
+  }
+  .admin-table td {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .admin-table tbody tr {
+    transition: background-color 120ms ease;
+  }
+  @media (hover: hover) {
+    .admin-table tbody tr:hover {
+      background: color-mix(in oklch, var(--accent) 50%, transparent);
+    }
+  }
+}
+
+/* Buttons feel pressed the moment the pointer goes down (apple-design: respond on pointer-down) */
+[data-slot='button'] {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 150ms;
+  transition-timing-function: var(--ease-out);
+}
+[data-slot='button']:not([data-disabled]):active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  [data-slot='button']:active,
+  .surface-interactive:active {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .material {
+    background: var(--card) !important;
+    backdrop-filter: none !important;
+  }
+}
+
+/* ---------- FullCalendar (forma theme) mapped onto the campus tokens ---------- */
+.campus-calendar {
+  --fc-forma-primary: var(--primary);
+  --fc-forma-primary-over: var(--brand-ink);
+  --fc-forma-primary-down: var(--brand-ink);
+  --fc-forma-primary-foreground: var(--primary-foreground);
+  --fc-forma-event: var(--primary);
+  --fc-forma-highlight: oklch(0.5 0.16 258 / 0.18);
+  --fc-forma-border: var(--border);
+  --fc-forma-muted-border: var(--border);
+  --fc-forma-foreground: var(--foreground);
+  --fc-forma-muted-foreground: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
 }
