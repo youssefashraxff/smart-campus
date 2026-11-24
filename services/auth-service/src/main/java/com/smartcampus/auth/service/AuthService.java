@@ -6,12 +6,13 @@ import com.smartcampus.auth.dto.RegisterRequest;
 import com.smartcampus.auth.dto.UserResponse;
 import com.smartcampus.auth.entity.Role;
 import com.smartcampus.auth.entity.User;
-import com.smartcampus.auth.exception.BadRequestException;
-import com.smartcampus.auth.exception.ConflictException;
-import com.smartcampus.auth.exception.InvalidCredentialsException;
-import com.smartcampus.auth.exception.NotFoundException;
 import com.smartcampus.auth.repository.UserRepository;
+import com.smartcampus.shared.exception.BadRequestException;
+import com.smartcampus.shared.exception.ConflictException;
+import com.smartcampus.shared.exception.NotFoundException;
+import com.smartcampus.shared.exception.UnauthorizedException;
 import java.util.Locale;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +46,7 @@ public class AuthService {
         String universityId = request.universityId().trim();
 
         // Friendly 409s for the normal case. The UNIQUE constraints in V1 are the real guard
-        // if two requests race past these checks at the same moment (handled in step 9).
+        // if two requests race past these checks at the same moment (caught below).
         if (userRepository.existsByEmail(email)) {
             throw new ConflictException("Email is already registered");
         }
@@ -57,18 +58,25 @@ public class AuthService {
         String hash = passwordEncoder.encode(request.password());
         User user = new User(request.name().trim(), universityId, email, hash, request.role());
 
-        return UserResponse.from(userRepository.save(user));
+        try {
+            // saveAndFlush sends the INSERT now (not at commit), so a UNIQUE violation is thrown
+            // here where we can turn it into a 409 instead of leaking the DB message
+            return UserResponse.from(userRepository.saveAndFlush(user));
+        } catch (DataIntegrityViolationException ex) {
+            // Two registrations raced past the exists checks and the UNIQUE constraint stopped the second
+            throw new ConflictException("Email or university ID is already registered");
+        }
     }
 
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(normalizeEmail(request.email()))
-                .orElseThrow(() -> new InvalidCredentialsException(BAD_CREDENTIALS));
+                .orElseThrow(() -> new UnauthorizedException(BAD_CREDENTIALS));
 
         // matches() reads the salt and cost from the stored hash, re-hashes the input, compares.
         // Never compare with equals(): the stored value is a hash, not the password.
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-            throw new InvalidCredentialsException(BAD_CREDENTIALS);
+            throw new UnauthorizedException(BAD_CREDENTIALS);
         }
 
         return new AuthResponse(jwtService.generate(user), UserResponse.from(user));

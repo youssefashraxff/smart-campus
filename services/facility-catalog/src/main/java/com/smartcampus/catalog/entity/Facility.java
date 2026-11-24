@@ -8,11 +8,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 // Maps the facilities table (V1__create_catalog_tables.sql): a room, lab or piece of equipment
 @Getter
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)   // JPA needs a no-args constructor
 @Table(name = "facilities")
 public class Facility {
 
@@ -37,4 +40,25 @@ public class Facility {
 
     @Enumerated(EnumType.STRING)
     private FacilityStatus status;
+
+    public Facility(String title, String building, String location,
+                    Integer capacity, FacilityType type, FacilityStatus status) {
+        this.title = title;
+        this.building = building;
+        this.location = location;
+        this.capacity = capacity;
+        this.type = type;
+        this.status = status;
+    }
+
+    // Full replacement used by PUT /api/facilities/{id}
+    public void update(String title, String building, String location,
+                       Integer capacity, FacilityType type, FacilityStatus status) {
+        this.title = title;
+        this.building = building;
+        this.location = location;
+        this.capacity = capacity;
+        this.type = type;
+        this.status = status;
+    }
 }

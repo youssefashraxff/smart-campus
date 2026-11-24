@@ -9,11 +9,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 // Maps the speakers table (V1__create_catalog_tables.sql).
 @Getter
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)   // JPA needs a no-args constructor
 @Table(name = "speakers")
 public class Speaker {
 
@@ -37,4 +40,17 @@ public class Speaker {
 
     // TEXT column
     private String bio;
+
+    public Speaker(Event event, String name, String affiliation, String bio) {
+        this.event = event;
+        this.name = name;
+        this.affiliation = affiliation;
+        this.bio = bio;
+    }
+
+    public void update(String name, String affiliation, String bio) {
+        this.name = name;
+        this.affiliation = affiliation;
+        this.bio = bio;
+    }
 }
