@@ -1,0 +1,85 @@
+<app-auth-layout
+  title="Sign in"
+  subtitle="Use your university email to book rooms and join events."
+>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4" novalidate>
+    @if (serverError()) {
+      <p role="alert" class="bg-destructive-soft text-destructive rounded-xl px-3.5 py-2.5 text-sm">
+        {{ serverError() }}
+      </p>
+    }
+
+    <app-form-field
+      label="Email"
+      for="email"
+      [error]="showError('email') ? 'Enter your university email.' : null"
+    >
+      <input
+        hlmInput
+        id="email"
+        type="email"
+        autocomplete="username"
+        inputmode="email"
+        placeholder="name@cis.asu.edu.eg"
+        formControlName="email"
+        [attr.aria-invalid]="showError('email')"
+        aria-describedby="email-error"
+      />
+    </app-form-field>
+
+    <app-form-field
+      label="Password"
+      for="password"
+      [error]="showError('password') ? 'Enter your password.' : null"
+    >
+      <app-password-toggle #toggle>
+        <input
+          hlmInput
+          id="password"
+          class="pe-11"
+          [type]="toggle.visible() ? 'text' : 'password'"
+          autocomplete="current-password"
+          formControlName="password"
+          [attr.aria-invalid]="showError('password')"
+          aria-describedby="password-error"
+        />
+      </app-password-toggle>
+    </app-form-field>
+
+    <button hlmBtn size="lg" type="submit" class="mt-2 w-full" [disabled]="busy()">
+      {{ busy() ? 'Signing in…' : 'Sign in' }}
+    </button>
+  </form>
+
+  @if (!production) {
+    <details class="bg-muted/60 mt-6 rounded-xl px-3.5 py-3 text-xs">
+      <summary class="text-muted-foreground cursor-pointer font-medium">
+        Demo accounts (seed data)
+      </summary>
+      <div class="mt-3 flex flex-col gap-2">
+        @for (account of demoAccounts; track account.email) {
+          <button
+            type="button"
+            class="hover:bg-card flex items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-start transition-colors"
+            (click)="fill(account.email, account.password)"
+          >
+            <span class="min-w-0">
+              <span class="block font-medium">{{ account.label }}</span>
+              <span class="text-muted-foreground block truncate">{{ account.email }}</span>
+            </span>
+            <span class="text-primary shrink-0 font-medium">Use</span>
+          </button>
+        }
+      </div>
+    </details>
+  }
+
+  <p footer>
+    New to Smart Campus?
+    <a
+      routerLink="/register"
+      class="text-primary font-medium underline-offset-[0.2em] hover:underline"
+      >Create an account</a
+    >
+  </p>
+</app-auth-layout>

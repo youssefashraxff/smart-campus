@@ -44,7 +44,7 @@ application (the gateway). Out of scope: payments, mobile apps, real university 
 ## 3. Architecture
 
 ```
-Angular (4200) ──HTTP + JWT──▶ API Gateway (5000) ──REST/JSON──▶ AuthService          (5001)
+Angular (4200) ──HTTP + JWT──▶ API Gateway (5010) ──REST/JSON──▶ AuthService          (5001)
                                Spring Cloud Gateway             FacilityCatalog      (5002)
                                aggregation                      BookingEngine        (5003) ──▶ NotificationService
                                JWT validation, CORS             NotificationService  (5004)
@@ -54,7 +54,7 @@ Angular (4200) ──HTTP + JWT──▶ API Gateway (5000) ──REST/JSON─�
 
 | Project | Port | Responsibility |
 | --- | --- | --- |
-| Gateway | 5000 | Single entry point: Spring Cloud Gateway routing, aggregated endpoints, JWT validation, CORS |
+| Gateway | 5010 | Single entry point: Spring Cloud Gateway routing, aggregated endpoints, JWT validation, CORS |
 | AuthService | 5001 | Registration, login, JWT issuing, roles |
 | FacilityCatalog | 5002 | Facilities, equipment, events, speakers, search |
 | BookingEngine | 5003 | Reservations, registrations, conflict checks, calendar export |

@@ -7,7 +7,7 @@ workshops and track their reservations. Every function is a REST web service beh
 ## Architecture
 
 ```
-Angular (4200) ──HTTP──▶ API Gateway (5000) ──▶ Auth Service          (5001)
+Angular (4200) ──HTTP──▶ API Gateway (5010) ──▶ Auth Service          (5001)
                          Spring Cloud Gateway   Facility Catalog      (5002)
                          routing                Booking Engine        (5003)
                                                 Notification Service  (5004)

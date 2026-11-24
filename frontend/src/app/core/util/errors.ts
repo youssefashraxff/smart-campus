@@ -5,7 +5,7 @@ import { ProblemDetail } from '../models';
 // These helpers turn one into a sentence a student can act on.
 
 const FALLBACK: Record<number, string> = {
-  0: 'Can’t reach the campus server. Check that the gateway is running on port 5000.',
+  0: 'Can’t reach the campus server. Check that the gateway is running on port 5010.',
   400: 'Some of the details aren’t valid.',
   401: 'Your session has ended. Please sign in again.',
   403: 'You don’t have permission to do that.',

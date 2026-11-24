@@ -1,0 +1,43 @@
+<app-page-header
+  title="Alerts"
+  description="Booking confirmations, reminders and schedule changes. They’re also sent to your email."
+>
+  @if (unread().length > 1) {
+    <button hlmBtn variant="outline" (click)="markAllRead()" [disabled]="markingAll()">
+      <ng-icon name="lucideCheckCheck" />
+      Mark all as read
+    </button>
+  }
+</app-page-header>
+
+<label class="mt-6 inline-flex cursor-pointer items-center gap-2.5 text-sm select-none">
+  <input
+    type="checkbox"
+    class="size-4 accent-[var(--primary)]"
+    [checked]="unreadOnly()"
+    (change)="unreadOnly.set($any($event.target).checked)"
+  />
+  Unread only
+</label>
+
+<section class="surface-raised mt-4 p-5 sm:p-6" aria-label="Alerts">
+  @if (alerts.error()) {
+    <app-error-state [error]="alerts.error()" (retry)="alerts.reload()" />
+  } @else if (!alerts.hasValue()) {
+    <app-list-skeleton [rows]="4" label="Loading alerts" />
+  } @else if (visible().length === 0) {
+    <app-empty-state
+      icon="lucideBellRing"
+      [title]="unreadOnly() ? 'No unread alerts' : 'No alerts yet'"
+      description="When you book, cancel or an event changes, you’ll hear about it here."
+    />
+  } @else {
+    <ul class="divide-border -my-3.5 divide-y" role="list">
+      @for (a of visible(); track a.id) {
+        <li>
+          <app-alert-row [alert]="a" [busy]="marking().has(a.id)" (markRead)="markRead($event)" />
+        </li>
+      }
+    </ul>
+  }
+</section>

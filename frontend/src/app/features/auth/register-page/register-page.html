@@ -1,0 +1,96 @@
+<app-auth-layout
+  title="Create your account"
+  subtitle="Students and faculty get the same access to rooms, labs and events."
+>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4" novalidate>
+    @if (serverError()) {
+      <p role="alert" class="bg-destructive-soft text-destructive rounded-xl px-3.5 py-2.5 text-sm">
+        {{ serverError() }}
+      </p>
+    }
+
+    <fieldset class="flex flex-col gap-1.5">
+      <legend class="mb-1.5 text-sm font-medium">I am</legend>
+      <div class="bg-muted grid grid-cols-2 gap-1 rounded-xl p-1">
+        @for (role of roles; track role) {
+          <label
+            class="has-checked:bg-card has-checked:text-foreground has-checked:shadow-raised has-focus-visible:ring-ring/50 text-muted-foreground relative flex h-9 cursor-pointer items-center justify-center rounded-[0.6rem] text-sm font-medium transition-[background-color,box-shadow,color] has-focus-visible:ring-3"
+          >
+            <input type="radio" class="sr-only" formControlName="role" [value]="role" />
+            {{ role === 'Student' ? 'a student' : 'faculty staff' }}
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    <app-form-field label="Full name" for="name" [error]="error('name')">
+      <input
+        hlmInput
+        id="name"
+        autocomplete="name"
+        formControlName="name"
+        [attr.aria-invalid]="!!error('name')"
+        aria-describedby="name-error"
+      />
+    </app-form-field>
+
+    <app-form-field
+      label="University ID"
+      for="universityId"
+      [error]="error('universityId')"
+      hint="On your faculty ID card, e.g. 2022170045."
+    >
+      <input
+        hlmInput
+        id="universityId"
+        class="tabular"
+        formControlName="universityId"
+        [attr.aria-invalid]="!!error('universityId')"
+        aria-describedby="universityId-error universityId-hint"
+      />
+    </app-form-field>
+
+    <app-form-field label="University email" for="email" [error]="error('email')">
+      <input
+        hlmInput
+        id="email"
+        type="email"
+        inputmode="email"
+        autocomplete="email"
+        placeholder="name@cis.asu.edu.eg"
+        formControlName="email"
+        [attr.aria-invalid]="!!error('email')"
+        aria-describedby="email-error"
+      />
+    </app-form-field>
+
+    <app-form-field
+      label="Password"
+      for="password"
+      [error]="error('password')"
+      hint="At least 8 characters."
+    >
+      <app-password-toggle #toggle>
+        <input
+          hlmInput
+          id="password"
+          class="pe-11"
+          [type]="toggle.visible() ? 'text' : 'password'"
+          autocomplete="new-password"
+          formControlName="password"
+          [attr.aria-invalid]="!!error('password')"
+          aria-describedby="password-error password-hint"
+        />
+      </app-password-toggle>
+    </app-form-field>
+
+    <button hlmBtn size="lg" type="submit" class="mt-2 w-full" [disabled]="busy()">
+      {{ busy() ? 'Creating account…' : 'Create account' }}
+    </button>
+  </form>
+
+  <p footer>
+    Already have an account?
+    <a routerLink="/login" class="text-primary font-medium hover:underline">Sign in</a>
+  </p>
+</app-auth-layout>

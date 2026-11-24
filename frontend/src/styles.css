@@ -164,6 +164,17 @@
     text-box: trim-both cap alphabetic;
   }
 
+  /* Tailwind 4 leaves buttons on the default arrow; disabled ones keep it */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+
+  /* Edge draws its own reveal eye in password inputs; we already have a show/hide button */
+  input::-ms-reveal {
+    display: none;
+  }
+
   /* Times, capacities and counts line up in columns */
   time,
   .tabular {

@@ -21,7 +21,7 @@ and explain non-obvious decisions in your summary.
 
 | Module | Port | Base package | Flyway history table |
 | --- | --- | --- | --- |
-| gateway | 5000 | `com.smartcampus.gateway` | — |
+| gateway | 5010 | `com.smartcampus.gateway` | — |
 | services/auth-service | 5001 | `com.smartcampus.auth` | `flyway_history_auth` |
 | services/facility-catalog | 5002 | `com.smartcampus.catalog` | `flyway_history_catalog` |
 | services/booking-engine | 5003 | `com.smartcampus.booking` | `flyway_history_booking` |
@@ -33,7 +33,7 @@ Each service has `controller/`, `entity/` and `repository/` packages. Ports and 
 
 ## Rules
 
-- **Frontend talks only to the gateway** (`http://localhost:5000/api`, see `frontend/src/environments`).
+- **Frontend talks only to the gateway** (`http://localhost:5010/api`, see `frontend/src/environments`).
   Gateway routes live in `gateway/src/main/resources/application.yml` under `spring.cloud.gateway.server.webflux.routes`.
 - **Data ownership:** each service maps only its own tables and has its own Flyway history table (above).
   Cross-service IDs have no foreign keys; validate them by calling the owning service over HTTP

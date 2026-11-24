@@ -1,6 +1,6 @@
 # Gateway configuration: the only port the Angular frontend talks to (FR-C1)
 server:
-  port: 5000
+  port: 5010
 
 spring:
   application:
@@ -11,6 +11,9 @@ spring:
         webflux:
           # CORS for the Angular dev server (FR-C4, NFR-5). Only this origin may call the API from a browser.
           globalcors:
+            # Also send the CORS headers when no route matches. Without them the browser hides the real
+            # 404 and Angular only sees "status 0", which looks as if the gateway were down.
+            add-to-simple-url-handler-mapping: true
             cors-configurations:
               "[/**]":
                 allowed-origins: http://localhost:4200

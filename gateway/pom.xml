@@ -23,6 +23,14 @@
             <groupId>com.smartcampus</groupId>
             <artifactId>shared</artifactId>
         </dependency>
+        <!-- Netty's DNS library for Apple Silicon Macs. reactor-netty only brings the Intel one, so the
+             gateway logs "Unable to load MacOSDnsServerAddressStreamProvider". Unused on other systems. -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-resolver-dns-native-macos</artifactId>
+            <classifier>osx-aarch_64</classifier>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>

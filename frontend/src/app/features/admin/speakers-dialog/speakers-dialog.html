@@ -1,0 +1,77 @@
+<hlm-dialog [state]="open() ? 'open' : 'closed'" (closed)="open.set(false)">
+  <hlm-dialog-content
+    *brnDialogContent="let ctx"
+    class="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-lg"
+  >
+    <hlm-dialog-header>
+      <h2 hlmDialogTitle class="text-lg font-semibold">Speakers</h2>
+      <p hlmDialogDescription class="text-muted-foreground text-sm">{{ event()?.title }}</p>
+    </hlm-dialog-header>
+
+    @if (loading()) {
+      <app-list-skeleton [rows]="2" label="Loading speakers" />
+    } @else if (speakers().length === 0) {
+      <p class="text-muted-foreground bg-muted/60 rounded-xl px-4 py-3 text-sm">
+        No speakers yet. Add the first one below.
+      </p>
+    } @else {
+      <ul class="divide-border surface-flat divide-y" role="list">
+        @for (s of speakers(); track s.id) {
+          <li class="flex items-start gap-3 p-3.5" [class.bg-brand-soft]="editingId() === s.id">
+            <div class="min-w-0 flex-1">
+              <p class="font-medium">{{ s.name }}</p>
+              <p class="text-muted-foreground text-xs">{{ s.affiliation }}</p>
+            </div>
+            <button
+              hlmBtn
+              variant="ghost"
+              size="icon-sm"
+              (click)="startEdit(s)"
+              [attr.aria-label]="'Edit ' + s.name"
+            >
+              <ng-icon name="lucidePencil" />
+            </button>
+            <button
+              hlmBtn
+              variant="ghost"
+              size="icon-sm"
+              class="hover:text-destructive"
+              (click)="remove(s)"
+              [attr.aria-label]="'Remove ' + s.name"
+            >
+              <ng-icon name="lucideTrash2" />
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col gap-3" novalidate>
+      <h3 class="text-sm font-semibold">
+        {{ editingId() ? 'Edit speaker' : 'Add a speaker' }}
+      </h3>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <app-form-field label="Name" for="s-name"
+          ><input hlmInput id="s-name" formControlName="name"
+        /></app-form-field>
+        <app-form-field label="Affiliation" for="s-affiliation"
+          ><input hlmInput id="s-affiliation" formControlName="affiliation"
+        /></app-form-field>
+      </div>
+      <app-form-field label="Short bio" for="s-bio">
+        <textarea hlmTextarea id="s-bio" rows="2" formControlName="bio"></textarea>
+      </app-form-field>
+      <div class="flex justify-end gap-2">
+        @if (editingId()) {
+          <button hlmBtn variant="ghost" type="button" (click)="resetForm()">Cancel edit</button>
+        }
+        <button hlmBtn type="submit" [disabled]="form.invalid || busy()">
+          @if (!editingId()) {
+            <ng-icon name="lucidePlus" />
+          }
+          {{ busy() ? 'Saving…' : editingId() ? 'Save speaker' : 'Add speaker' }}
+        </button>
+      </div>
+    </form>
+  </hlm-dialog-content>
+</hlm-dialog>
