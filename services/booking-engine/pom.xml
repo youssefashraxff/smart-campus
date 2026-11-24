@@ -21,6 +21,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
+        <!-- @Valid, @NotNull on request bodies (C#: DataAnnotations) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
         <!-- @Entity + JpaRepository, Hibernate underneath (C#: EF Core) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

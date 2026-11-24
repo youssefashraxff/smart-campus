@@ -24,3 +24,8 @@ spring:
     # campusdb already has the other services' tables, so start the history from version 0
     baseline-on-migrate: true
     baseline-version: 0
+
+# Other services this one calls over HTTP (used in RestClientConfig)
+services:
+  catalog-url: http://localhost:5002
+  notification-url: http://localhost:5004
