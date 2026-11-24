@@ -1,6 +1,7 @@
 package com.smartcampus.booking.client;
 
 import com.smartcampus.shared.contracts.EventResponse;
+import com.smartcampus.shared.contracts.FacilityResponse;
 import com.smartcampus.shared.exception.NotFoundException;
 import com.smartcampus.shared.exception.ServiceUnavailableException;
 import org.slf4j.Logger;
@@ -25,14 +26,22 @@ public class CatalogClient {
     }
 
     public EventResponse getEvent(Integer id) {
-        log.debug("Fetching event {} from facility-catalog", id);
+        return get("Event", "/api/events/{id}", id, EventResponse.class);
+    }
+
+    public FacilityResponse getFacility(Integer id) {
+        return get("Facility", "/api/facilities/{id}", id, FacilityResponse.class);
+    }
+
+    private <T> T get(String name, String path, Integer id, Class<T> type) {
+        log.debug("Fetching {} {} from facility-catalog", name, id);
         try {
-            return restClient.get().uri("/api/events/{id}", id).retrieve().body(EventResponse.class);
+            return restClient.get().uri(path, id).retrieve().body(type);
         } catch (HttpClientErrorException.NotFound ex) {
-            throw new NotFoundException("Event " + id + " not found");
+            throw new NotFoundException(name + " " + id + " not found");
         } catch (RestClientException ex) {
             // Connection refused, timeout, or an answer we cannot use (e.g. a 500 from the catalog)
-            log.warn("Fetching event {} from facility-catalog failed: {}", id, ex.getMessage());
+            log.warn("Fetching {} {} from facility-catalog failed: {}", name, id, ex.getMessage());
             throw new ServiceUnavailableException("Facility catalog is unavailable, please try again later", ex);
         }
     }
