@@ -1,0 +1,5 @@
+# Copy this file to application-local.yml (same folder). application-local.yml is git-ignored, so the
+# secret never reaches GitHub. Use the SAME value as in services/auth-service, otherwise the gateway
+# rejects every token. Make one with: openssl rand -base64 32
+jwt:
+  secret: your-base64-secret
