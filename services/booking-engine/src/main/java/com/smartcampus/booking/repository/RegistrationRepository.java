@@ -6,11 +6,14 @@ import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 
 // Database access for Registration. Spring Data writes the implementation at startup;
 // JpaRepository<Registration, Integer> already gives save, findById, findAll, deleteById, count, ...
-public interface RegistrationRepository extends JpaRepository<Registration, Integer> {
+// JpaSpecificationExecutor adds findAll(specification, sort), for queries with optional filters (FR-A6).
+public interface RegistrationRepository
+        extends JpaRepository<Registration, Integer>, JpaSpecificationExecutor<Registration> {
 
     // How many seats of an event are taken
     long countByEventIdAndStatus(Integer eventId, RegistrationStatus status);

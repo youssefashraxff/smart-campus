@@ -1,11 +1,12 @@
 package com.smartcampus.booking.service;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-// Notification messages show campus time, whatever offset the stored or received time uses
+// Campus time (Cairo), whatever offset the stored or received time uses
 final class CampusTime {
 
     private static final ZoneId ZONE = ZoneId.of("Africa/Cairo");
@@ -15,7 +16,13 @@ final class CampusTime {
     private CampusTime() {
     }
 
-    // e.g. "Tue 1 Dec, 11:00"
+    // The first moment of that day on campus. Usually 00:00, but on the day summer time starts Egypt's
+    // clocks jump from 00:00 to 01:00, and atStartOfDay(zone) handles that.
+    static OffsetDateTime startOfDay(LocalDate date) {
+        return date.atStartOfDay(ZONE).toOffsetDateTime();
+    }
+
+    // For notification messages, e.g. "Tue 1 Dec, 11:00"
     static String format(OffsetDateTime time) {
         return time.atZoneSameInstant(ZONE).format(FORMAT);
     }

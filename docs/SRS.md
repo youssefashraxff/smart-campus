@@ -148,6 +148,11 @@ Catalog once and the Booking Engine once, in parallel, and returns
 `[from 00:00, to + 1 day 00:00)`, each listed once, with no user ids. `to` before `from`, or a range over 31 days,
 is a 400.
 
+**All bookings (admin).** Every filter is optional. `facilityId` and `date` filter the bookings, `eventId` filters
+the registrations. `date` is a `YYYY-MM-DD` day in Africa/Cairo and keeps bookings that overlap that day; it does not
+filter registrations, which have no time of their own. Returns `{ bookings, registrations }`, sorted by start time
+and by created time, cancelled ones included.
+
 Errors: 400 invalid input · 401 missing/invalid JWT · 403 wrong role · 404 not found ·
 409 booking conflict / event full / already registered · 503 downstream service unavailable (gateway).
 
