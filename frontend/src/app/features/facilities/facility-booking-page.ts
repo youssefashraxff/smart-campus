@@ -34,7 +34,6 @@ import {
 } from '@ng-icons/lucide';
 import { toast } from '@spartan-ng/brain/sonner';
 import { HlmButton } from '@spartan-ng/helm/button';
-import { forkJoin, map } from 'rxjs';
 import { CatalogApi } from '../../core/api/catalog.api';
 import { BookingApi } from '../../core/api/booking.api';
 import { errorMessage, statusOf } from '../../core/util/errors';
@@ -89,7 +88,7 @@ function defaultSlot(): { date: string; start: string; end: string } {
 /**
  * FR-U5: reserve a facility for a time slot.
  * The week calendar shows taken slots from the gateway's GET /api/facilities/{id}/availability (FR-C3),
- * one call per visible day, in parallel. The calendar is fed one signal (calendarEvents), so taken slots
+ * one request for the visible range (?from=&to=). The calendar is fed one signal (calendarEvents), so taken slots
  * and your selection always update together. Dragging on the calendar fills the form; the form also works
  * on its own, so booking doesn't depend on a mouse. The overlap check here is only for quick feedback:
  * the Booking Engine re-checks inside a serializable transaction and answers 409 if someone else got
@@ -357,7 +356,7 @@ export class FacilityBookingPage {
   /** Set after a successful booking: the panel shows a confirmation instead of the form */
   protected readonly justBooked = signal<string | null>(null);
 
-  /** Booked slots for the visible week, from the availability endpoint */
+  /** Booked slots for the visible range, from the availability endpoint */
   private readonly bookedSlots = signal<{ startTime: string; endTime: string }[]>([]);
   /** The same slots as numbers, for the instant overlap check */
   private readonly booked = computed(() =>
@@ -453,9 +452,13 @@ export class FacilityBookingPage {
     selectAllow: (span) => span.start.getTime() > Date.now(),
     select: (info) => this.onSelect(info),
     // Runs on first render and whenever the user moves to another week or day
+    // FullCalendar can report the same range more than once, so only a new range triggers a request
     datesSet: (range) => {
+      const unchanged =
+        this.visibleRange?.start.getTime() === range.start.getTime() &&
+        this.visibleRange?.end.getTime() === range.end.getTime();
       this.visibleRange = { start: range.start, end: range.end };
-      this.loadBooked();
+      if (!unchanged) this.loadBooked();
     },
   };
 
@@ -503,34 +506,20 @@ export class FacilityBookingPage {
     info.view.calendar.unselect();
   }
 
-  /** One availability call per visible day, in parallel (NFR-3) */
+  /**
+   * One availability request for the whole visible range (FR-C3, NFR-3).
+   * FullCalendar's range end is exclusive (the day after the last column), while the API's `to`
+   * is inclusive, so step back one day.
+   */
   private loadBooked(): void {
     const range = this.visibleRange;
     if (!range) return;
-    const days: string[] = [];
-    for (
-      let d = toCampusDate(range.start.toISOString());
-      d < toCampusDate(range.end.toISOString());
-      d = addDays(d, 1)
-    ) {
-      days.push(d);
-    }
-    forkJoin(days.map((day) => this.catalog.availability(this.id(), day)))
-      .pipe(
-        map((responses) => {
-          // A booking that crosses midnight is returned for both days: keep one copy
-          const unique = new Map<string, { startTime: string; endTime: string }>();
-          responses
-            .flatMap((r) => r.bookedSlots)
-            .forEach((s) => unique.set(s.startTime + s.endTime, s));
-          return [...unique.values()];
-        }),
-      )
-      .subscribe({
-        next: (slots) => this.bookedSlots.set(slots),
-        error: (err) =>
-          toast.error('Couldn’t load availability', { description: errorMessage(err) }),
-      });
+    const from = toCampusDate(range.start.toISOString());
+    const to = addDays(toCampusDate(range.end.toISOString()), -1);
+    this.catalog.availability(this.id(), from, to).subscribe({
+      next: (res) => this.bookedSlots.set(res.bookedSlots),
+      error: (err) => toast.error('Couldn’t load availability', { description: errorMessage(err) }),
+    });
   }
 
   protected book(): void {

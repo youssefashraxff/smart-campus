@@ -47,7 +47,7 @@ named there; the others follow the ClickUp task descriptions:
 | `POST /api/registrations` | body `{ eventId }` |
 | `GET /api/notifications/mine` | `{ id, type, message, isRead, createdAt }[]`, newest first |
 | `GET /api/dashboard` | `{ upcoming, unreadAlerts, unreadCount, upcomingStatus, alertsStatus }`, statuses `ok`/`unavailable` |
-| `GET /api/facilities/{id}/availability?date=` | `{ facility, date, bookedSlots: [{ startTime, endTime }] }` |
+| `GET /api/facilities/{id}/availability?from=&to=` | `{ facility, from, to, bookedSlots: [{ startTime, endTime }] }`. One request per calendar view; `from`/`to` are `YYYY-MM-DD`, both inclusive, in Cairo time |
 | `GET /api/events?from=&to=` | `from`/`to` sent as `YYYY-MM-DD` |
 
 Times are ISO-8601 strings with an offset (`OffsetDateTime`). Errors are read from RFC 9457 ProblemDetail

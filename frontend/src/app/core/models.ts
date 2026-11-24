@@ -166,10 +166,15 @@ export interface Dashboard {
   alertsStatus: SectionStatus;
 }
 
-/** Availability response (Gateway: facility availability task) */
+/**
+ * Availability response (Gateway: facility availability task).
+ * from/to are Cairo calendar dates, both inclusive; bookedSlots are the Confirmed bookings that overlap
+ * that range, each listed once, with no user ids.
+ */
 export interface Availability {
   facility: Facility;
-  date: string;
+  from: string;
+  to: string;
   bookedSlots: { startTime: string; endTime: string }[];
 }
 

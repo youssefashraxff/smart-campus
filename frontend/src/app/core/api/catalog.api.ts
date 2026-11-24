@@ -54,10 +54,14 @@ export class CatalogApi {
     return this.http.delete<void>(api(`/facilities/${id}`));
   }
 
-  /** Gateway aggregation (FR-C3): the facility plus that day's booked slots */
-  availability(id: number, date: string) {
+  /**
+   * Gateway aggregation (FR-C3): the facility plus its booked slots between two dates, in one request.
+   * from/to are YYYY-MM-DD in Cairo time, both inclusive (a week view sends Saturday to Friday,
+   * a day view sends the same date twice).
+   */
+  availability(id: number, from: string, to: string) {
     return this.http.get<Availability>(api(`/facilities/${id}/availability`), {
-      params: queryParams({ date }),
+      params: queryParams({ from, to }),
     });
   }
 
