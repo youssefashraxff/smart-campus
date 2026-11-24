@@ -1,0 +1,168 @@
+<a
+  routerLink="/facilities"
+  class="text-muted-foreground hover:text-foreground -ms-1 inline-flex items-center gap-1.5 rounded-lg px-1 py-1 text-sm font-medium"
+>
+  <ng-icon name="lucideArrowLeft" size="16" aria-hidden="true" /> All facilities
+</a>
+
+@if (facility.error()) {
+  <div class="surface-raised mt-4">
+    <app-error-state
+      [error]="facility.error()"
+      title="Couldn’t load this facility"
+      (retry)="facility.reload()"
+    />
+  </div>
+} @else if (!facility.hasValue()) {
+  <div class="surface-raised mt-4 p-4">
+    <app-list-skeleton [rows]="2" label="Loading facility" />
+  </div>
+} @else {
+  @let f = facility.value();
+  <header class="mt-3 flex flex-col gap-4 sm:flex-row sm:items-center">
+    <span
+      class="bg-brand-soft text-brand-ink grid size-14 shrink-0 place-items-center rounded-2xl"
+      aria-hidden="true"
+    >
+      <ng-icon [name]="icon(f.type)" size="26" />
+    </span>
+    <div class="min-w-0 flex-1">
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <h1 class="text-[clamp(1.5rem,1.1rem+1.4vw,2rem)] font-semibold">{{ f.title }}</h1>
+        <app-status-badge [status]="f.status" />
+      </div>
+      <p class="text-muted-foreground mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+        <span class="inline-flex items-center gap-1.5"
+          ><ng-icon name="lucideMapPin" size="14" aria-hidden="true" />{{ f.building }} ·
+          {{ f.location }}</span
+        >
+        <span class="tabular inline-flex items-center gap-1.5"
+          ><ng-icon name="lucideUsers" size="14" aria-hidden="true" />{{
+            capacity(f.type, f.capacity)
+          }}</span
+        >
+      </p>
+    </div>
+  </header>
+
+  <div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+    <!-- Calendar -->
+    <section
+      class="surface-raised campus-calendar min-w-0 p-3 sm:p-5"
+      aria-label="Availability calendar"
+    >
+      <p
+        class="text-muted-foreground mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-xs"
+      >
+        <span class="inline-flex items-center gap-1.5"
+          ><span class="legend legend-busy" aria-hidden="true"></span>Booked</span
+        >
+        <span class="inline-flex items-center gap-1.5"
+          ><span class="legend legend-mine" aria-hidden="true"></span>Your selection</span
+        >
+        <span class="hidden sm:inline">Drag across free time to pick a slot.</span>
+      </p>
+      <full-calendar #calendar [options]="calendarOptions" [events]="calendarEvents()" />
+    </section>
+
+    <!-- Booking form -->
+    <aside class="surface-raised p-5 sm:p-6 lg:sticky lg:top-8" aria-labelledby="book-title">
+      <h2 id="book-title" class="text-lg font-semibold">Book a slot</h2>
+
+      @if (f.status === 'Maintenance') {
+        <div
+          role="status"
+          class="bg-warning-soft text-warning mt-4 flex gap-3 rounded-xl p-4 text-sm"
+        >
+          <ng-icon name="lucideWrench" size="18" class="mt-0.5 shrink-0" aria-hidden="true" />
+          <p>
+            <span class="font-semibold">Under maintenance.</span> This facility can’t take new
+            bookings until it’s available again.
+          </p>
+        </div>
+      } @else if (justBooked(); as booked) {
+        <div role="status" class="mt-4 flex flex-col items-start gap-3">
+          <p class="text-success flex items-center gap-2 font-semibold">
+            <ng-icon name="lucideCircleCheck" size="18" aria-hidden="true" /> Booked
+          </p>
+          <p class="text-sm">{{ booked }}</p>
+          <p class="text-muted-foreground text-sm">
+            It’s in My bookings now. You can cancel it there until it starts.
+          </p>
+          <div class="mt-1 flex flex-wrap gap-2">
+            <button hlmBtn (click)="bookAnother()">Book another slot</button>
+            <a hlmBtn variant="outline" routerLink="/bookings">My bookings</a>
+          </div>
+        </div>
+      } @else {
+        <form
+          class="mt-4 flex flex-col gap-4"
+          (submit)="$event.preventDefault(); book()"
+          novalidate
+        >
+          <app-form-field label="Date" for="date">
+            <input
+              id="date"
+              type="date"
+              class="select-native tabular bg-none"
+              [min]="today"
+              [value]="date()"
+              (change)="date.set($any($event.target).value); justBooked.set(null)"
+            />
+          </app-form-field>
+          <div class="grid grid-cols-2 gap-3">
+            <app-form-field label="From" for="start">
+              <select
+                id="start"
+                class="select-native tabular"
+                (change)="setStart($any($event.target).value)"
+              >
+                @for (t of times.slice(0, -1); track t) {
+                  <option [value]="t" [selected]="t === start()">{{ t }}</option>
+                }
+              </select>
+            </app-form-field>
+            <app-form-field label="To" for="end">
+              <select
+                id="end"
+                class="select-native tabular"
+                (change)="end.set($any($event.target).value); justBooked.set(null)"
+              >
+                @for (t of endTimes(); track t) {
+                  <option [value]="t" [selected]="t === end()">{{ t }}</option>
+                }
+              </select>
+            </app-form-field>
+          </div>
+
+          <div class="bg-muted/60 rounded-xl px-4 py-3 text-sm" aria-live="polite">
+            <p class="font-medium">{{ summaryDay() }}</p>
+            <p class="text-muted-foreground tabular">
+              {{ start() }}–{{ end() }} · {{ durationLabel() }}
+            </p>
+          </div>
+
+          @if (problem(); as p) {
+            <p role="alert" class="text-destructive flex items-start gap-2 text-sm">
+              <ng-icon
+                name="lucideTriangleAlert"
+                size="16"
+                class="mt-0.5 shrink-0"
+                aria-hidden="true"
+              />{{ p }}
+            </p>
+          }
+
+          <button hlmBtn size="lg" type="submit" class="w-full" [disabled]="!!problem() || busy()">
+            <ng-icon name="lucideCalendarCheck" />
+            {{ busy() ? 'Booking…' : 'Book this slot' }}
+          </button>
+          <p class="text-muted-foreground text-xs">
+            Times are campus time (Cairo). You’ll get a confirmation alert and a reminder 24 hours
+            before.
+          </p>
+        </form>
+      }
+    </aside>
+  </div>
+}

@@ -1,0 +1,116 @@
+<app-page-header [eyebrow]="today" [title]="greeting()">
+  <a hlmBtn variant="outline" routerLink="/events">
+    <ng-icon name="lucideCalendarDays" />
+    Browse events
+  </a>
+  <a hlmBtn routerLink="/facilities">
+    <ng-icon name="lucideBuilding2" />
+    Book a room
+  </a>
+</app-page-header>
+
+@if (dashboard.error()) {
+  <div class="surface-raised mt-8">
+    <app-error-state
+      [error]="dashboard.error()"
+      title="Couldn’t load your overview"
+      (retry)="dashboard.reload()"
+    />
+  </div>
+} @else {
+  <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+    <!-- Coming up -->
+    <section class="surface-raised min-w-0 p-5 sm:p-6" aria-labelledby="upcoming-title">
+      <div class="mb-5 flex items-center justify-between gap-3">
+        <h2 id="upcoming-title" class="text-lg font-semibold">Coming up</h2>
+        <a
+          routerLink="/bookings"
+          class="text-primary inline-flex items-center gap-1 text-sm font-medium hover:underline"
+        >
+          All bookings <ng-icon name="lucideArrowRight" size="15" aria-hidden="true" />
+        </a>
+      </div>
+
+      @if (!dashboard.hasValue()) {
+        <app-list-skeleton [rows]="3" label="Loading upcoming bookings" />
+      } @else if (dashboard.value().upcomingStatus === 'unavailable') {
+        <ng-container *ngTemplateOutlet="unavailable; context: { $implicit: 'Bookings' }" />
+      } @else if (dashboard.value().upcoming.length === 0) {
+        <app-empty-state
+          icon="lucideCalendarDays"
+          title="Nothing booked yet"
+          description="Reserve a study room or lab, or sign up for a workshop, and it shows up here."
+        >
+          <a hlmBtn variant="outline" routerLink="/facilities">Find a room</a>
+        </app-empty-state>
+      } @else {
+        <ul class="divide-border -my-4 divide-y" role="list">
+          @for (item of dashboard.value().upcoming; track item.kind + item.id) {
+            <li>
+              <app-my-item-row [item]="item" [showStatus]="false" [showRelative]="true" />
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <!-- Alerts -->
+    <section class="surface-raised min-w-0 p-5 sm:p-6" aria-labelledby="alerts-title">
+      <div class="mb-5 flex items-center justify-between gap-3">
+        <h2 id="alerts-title" class="flex items-center gap-2 text-lg font-semibold">
+          Alerts
+          @if (dashboard.hasValue() && unreadCount() > 0) {
+            <span
+              class="bg-sun tabular grid h-6 min-w-6 place-items-center rounded-full px-2 text-xs font-semibold"
+            >
+              {{ unreadCount() }}<span class="sr-only">&nbsp;unread</span>
+            </span>
+          }
+        </h2>
+        <a
+          routerLink="/alerts"
+          class="text-primary inline-flex items-center gap-1 text-sm font-medium hover:underline"
+        >
+          See all <ng-icon name="lucideArrowRight" size="15" aria-hidden="true" />
+        </a>
+      </div>
+
+      @if (!dashboard.hasValue()) {
+        <app-list-skeleton [rows]="3" label="Loading alerts" />
+      } @else if (dashboard.value().alertsStatus === 'unavailable') {
+        <ng-container *ngTemplateOutlet="unavailable; context: { $implicit: 'Alerts' }" />
+      } @else if (alerts().length === 0) {
+        <app-empty-state
+          icon="lucideBellRing"
+          title="You’re all caught up"
+          description="Confirmations, reminders and schedule changes appear here."
+        />
+      } @else {
+        <ul class="divide-border -my-3.5 divide-y" role="list">
+          @for (alert of alerts(); track alert.id) {
+            <li>
+              <app-alert-row
+                [alert]="alert"
+                [busy]="marking() === alert.id"
+                (markRead)="markRead($event)"
+              />
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+}
+
+<ng-template #unavailable let-section>
+  <div
+    role="status"
+    class="bg-muted/70 text-muted-foreground flex items-start gap-3 rounded-xl p-4 text-sm"
+  >
+    <ng-icon name="lucideCloudOff" size="18" class="mt-0.5 shrink-0" aria-hidden="true" />
+    <p>
+      <span class="text-foreground font-medium">{{ section }} are unavailable right now.</span>
+      The rest of the page still works. Refresh in a minute to try again.
+    </p>
+  </div>
+</ng-template>

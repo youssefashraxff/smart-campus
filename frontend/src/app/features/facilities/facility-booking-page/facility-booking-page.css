@@ -1,0 +1,36 @@
+.legend {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 0.25rem;
+  display: inline-block;
+}
+.legend-busy {
+  background: repeating-linear-gradient(
+    135deg,
+    oklch(0.94 0.008 255) 0 3px,
+    oklch(0.88 0.014 255) 3px 6px
+  );
+  outline: 1px solid oklch(0.84 0.02 255);
+}
+.legend-mine {
+  background: var(--primary);
+}
+input[type='date'].bg-none {
+  background-image: none;
+  padding-right: 0.875rem;
+}
+:host ::ng-deep .slot-busy {
+  --fc-event-color: oklch(0.92 0.012 255);
+  --fc-event-contrast-color: oklch(0.42 0.03 258);
+  background: repeating-linear-gradient(
+    135deg,
+    oklch(0.94 0.008 255) 0 6px,
+    oklch(0.9 0.014 255) 6px 12px
+  ) !important;
+  border: 1px solid oklch(0.84 0.02 255) !important;
+  color: oklch(0.42 0.03 258) !important;
+  cursor: not-allowed;
+}
+:host ::ng-deep .slot-mine {
+  box-shadow: var(--shadow-primary);
+}

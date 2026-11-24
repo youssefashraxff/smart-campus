@@ -1,0 +1,115 @@
+<hlm-dialog [state]="open() ? 'open' : 'closed'" (closed)="open.set(false)">
+  <hlm-dialog-content
+    *brnDialogContent="let ctx"
+    class="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl"
+  >
+    <hlm-dialog-header>
+      <h2 hlmDialogTitle class="text-lg font-semibold">
+        {{ event() ? 'Edit event' : 'Add an event' }}
+      </h2>
+      <p hlmDialogDescription class="text-muted-foreground text-sm">
+        Times are campus time (Cairo).
+      </p>
+    </hlm-dialog-header>
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="save()"
+      class="flex flex-col gap-4"
+      novalidate
+      id="event-form"
+    >
+      <app-form-field label="Title" for="e-title" [error]="error('title', 'Enter a title.')">
+        <input hlmInput id="e-title" formControlName="title" />
+      </app-form-field>
+      <app-form-field
+        label="Description"
+        for="e-description"
+        [error]="error('description', 'Add a short description.')"
+      >
+        <textarea hlmTextarea id="e-description" rows="3" formControlName="description"></textarea>
+      </app-form-field>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <app-form-field
+          label="Category"
+          for="e-category"
+          [error]="error('category', 'Enter a category.')"
+          hint="e.g. Workshop, Talk, Competition"
+        >
+          <input hlmInput id="e-category" formControlName="category" list="category-options" />
+          <datalist id="category-options">
+            @for (c of categories(); track c) {
+              <option [value]="c"></option>
+            }
+          </datalist>
+        </app-form-field>
+        <app-form-field
+          label="Capacity"
+          for="e-capacity"
+          [error]="error('capacity', 'At least 1 seat.')"
+        >
+          <input
+            hlmInput
+            id="e-capacity"
+            class="tabular"
+            type="number"
+            min="1"
+            formControlName="capacity"
+          />
+        </app-form-field>
+        <app-form-field
+          label="Building"
+          for="e-building"
+          [error]="error('building', 'Enter a building.')"
+        >
+          <input hlmInput id="e-building" formControlName="building" />
+        </app-form-field>
+        <app-form-field
+          label="Location"
+          for="e-location"
+          [error]="error('location', 'Enter a room or hall.')"
+        >
+          <input hlmInput id="e-location" formControlName="location" />
+        </app-form-field>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-[1.4fr_1fr_1fr]">
+        <app-form-field label="Date" for="e-date">
+          <input hlmInput id="e-date" class="tabular" type="date" formControlName="date" />
+        </app-form-field>
+        <app-form-field label="Starts" for="e-start">
+          <input
+            hlmInput
+            id="e-start"
+            class="tabular"
+            type="time"
+            step="900"
+            formControlName="start"
+          />
+        </app-form-field>
+        <app-form-field label="Ends" for="e-end" [error]="timeError()">
+          <input hlmInput id="e-end" class="tabular" type="time" step="900" formControlName="end" />
+        </app-form-field>
+      </div>
+      <app-form-field label="Status" for="e-status">
+        <select id="e-status" class="select-native" formControlName="status">
+          <option value="Scheduled">Scheduled</option>
+          <option value="Changed">Changed (rescheduled)</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </app-form-field>
+
+      @if (notifies()) {
+        <p role="status" class="bg-warning-soft text-warning rounded-xl px-3.5 py-2.5 text-sm">
+          Everyone registered for this event will get an alert and an email about this change.
+        </p>
+      }
+    </form>
+
+    <hlm-dialog-footer class="gap-2">
+      <button hlmBtn variant="outline" type="button" (click)="open.set(false)">Cancel</button>
+      <button hlmBtn type="submit" form="event-form" [disabled]="busy()">
+        {{ busy() ? 'Saving…' : event() ? 'Save changes' : 'Add event' }}
+      </button>
+    </hlm-dialog-footer>
+  </hlm-dialog-content>
+</hlm-dialog>

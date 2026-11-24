@@ -1,0 +1,192 @@
+<app-page-header
+  title="Events"
+  description="Workshops, talks, contests and socials at FCIS. Register to save your seat."
+/>
+
+<div
+  class="surface-flat mt-6 grid gap-3 p-3 sm:p-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,1fr))]"
+  role="search"
+>
+  <div class="relative md:col-span-2 xl:col-span-1">
+    <ng-icon
+      name="lucideSearch"
+      size="17"
+      class="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2"
+      aria-hidden="true"
+    />
+    <input
+      hlmInput
+      type="search"
+      class="ps-10"
+      placeholder="Search events"
+      aria-label="Search events"
+      [value]="q() ?? ''"
+      (input)="pendingSearch.set($any($event.target).value)"
+    />
+  </div>
+  <select
+    class="select-native"
+    aria-label="Category"
+    (change)="setFilter({ category: $any($event.target).value || null })"
+  >
+    <option value="">All categories</option>
+    @for (c of categories(); track c) {
+      <option [value]="c" [selected]="c === category()">{{ c }}</option>
+    }
+  </select>
+  <select
+    class="select-native"
+    aria-label="Building"
+    (change)="setFilter({ building: $any($event.target).value || null })"
+  >
+    <option value="">All buildings</option>
+    @for (b of buildings(); track b) {
+      <option [value]="b" [selected]="b === building()">{{ b }}</option>
+    }
+  </select>
+  <label class="relative">
+    <span
+      class="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-xs"
+      >From</span
+    >
+    <input
+      type="date"
+      class="select-native tabular date-input ps-14"
+      [value]="fromDate()"
+      (change)="setFilter({ from: $any($event.target).value || null })"
+    />
+  </label>
+  <label class="relative">
+    <span
+      class="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-xs"
+      >To</span
+    >
+    <input
+      type="date"
+      class="select-native tabular date-input ps-10"
+      [min]="fromDate()"
+      [value]="to() ?? ''"
+      (change)="setFilter({ to: $any($event.target).value || null })"
+    />
+  </label>
+</div>
+
+<section class="mt-6" aria-labelledby="events-results">
+  <h2 id="events-results" class="sr-only">Results</h2>
+  @if (events.error()) {
+    <div class="surface-raised">
+      <app-error-state [error]="events.error()" (retry)="events.reload()" />
+    </div>
+  } @else if (!events.hasValue()) {
+    <div class="surface-raised p-4">
+      <app-list-skeleton [rows]="4" label="Loading events" />
+    </div>
+  } @else {
+    <p class="text-muted-foreground mb-4 text-sm" aria-live="polite">
+      {{ total() }} {{ total() === 1 ? 'event' : 'events' }}
+      @if (hasFilters()) {
+        ·
+        <button
+          type="button"
+          class="text-primary font-medium hover:underline"
+          (click)="clearFilters()"
+        >
+          Clear filters
+        </button>
+      }
+    </p>
+    @if (groups().length === 0) {
+      <div class="surface-raised">
+        <app-empty-state
+          icon="lucideSearchX"
+          title="No events match"
+          description="Try a wider date range or another category."
+        >
+          <button hlmBtn variant="outline" (click)="clearFilters()">Clear filters</button>
+        </app-empty-state>
+      </div>
+    } @else {
+      <div class="flex flex-col gap-8">
+        @for (group of groups(); track group.date) {
+          <section [attr.aria-labelledby]="'day-' + group.date">
+            <h3
+              [id]="'day-' + group.date"
+              class="mb-3 flex items-baseline gap-2 text-sm font-semibold"
+            >
+              {{ group.label }}
+              @if (group.date === today) {
+                <span class="bg-sun-soft text-sun-ink rounded-full px-2 py-0.5 text-xs">Today</span>
+              }
+            </h3>
+            <ul class="surface-raised divide-border divide-y overflow-hidden" role="list">
+              @for (e of group.events; track e.id) {
+                <li>
+                  <a
+                    [routerLink]="['/events', e.id]"
+                    class="group hover:bg-accent/60 focus-visible:bg-accent flex items-center gap-4 px-4 py-4 outline-none transition-colors sm:px-5"
+                  >
+                    <div
+                      class="tabular hidden w-14 shrink-0 text-center sm:block"
+                      aria-hidden="true"
+                    >
+                      <p class="text-[0.9375rem] font-semibold">{{ time(e.startTime) }}</p>
+                      <p class="text-muted-foreground text-xs">{{ time(e.endTime) }}</p>
+                    </div>
+                    <span
+                      class="bg-border hidden h-10 w-px shrink-0 sm:block"
+                      aria-hidden="true"
+                    ></span>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-brand-ink text-xs font-semibold">{{ e.category }}</span>
+                        @if (e.status !== 'Scheduled') {
+                          <app-status-badge [status]="e.status" />
+                        }
+                      </div>
+                      <p
+                        class="clamp-2 mt-0.5 font-semibold"
+                        [class.line-through]="e.status === 'Cancelled'"
+                        [title]="e.title"
+                      >
+                        {{ e.title }}
+                      </p>
+                      <p
+                        class="text-muted-foreground mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-sm"
+                      >
+                        <span class="tabular inline-flex items-center gap-1.5"
+                          ><ng-icon name="lucideClock" size="14" aria-hidden="true" />{{
+                            time(e.startTime)
+                          }}–{{ time(e.endTime) }}</span
+                        >
+                        <span class="inline-flex min-w-0 items-center gap-1.5"
+                          ><ng-icon
+                            name="lucideMapPin"
+                            size="14"
+                            class="shrink-0"
+                            aria-hidden="true"
+                          /><span class="truncate">{{ e.building }}, {{ e.location }}</span></span
+                        >
+                        <span class="tabular inline-flex items-center gap-1.5"
+                          ><ng-icon name="lucideUsers" size="14" aria-hidden="true" />{{
+                            e.capacity
+                          }}
+                          seats</span
+                        >
+                      </p>
+                    </div>
+                    <ng-icon
+                      name="lucideChevronRight"
+                      size="18"
+                      class="text-muted-foreground shrink-0 transition-transform group-hover:translate-x-0.5"
+                      aria-hidden="true"
+                    />
+                  </a>
+                </li>
+              }
+            </ul>
+          </section>
+        }
+      </div>
+    }
+  }
+</section>

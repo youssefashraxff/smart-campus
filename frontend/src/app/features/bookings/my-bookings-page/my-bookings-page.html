@@ -1,0 +1,96 @@
+<app-page-header
+  title="My bookings"
+  description="Rooms you’ve reserved and events you’ve registered for."
+>
+  <button hlmBtn variant="outline" (click)="downloadCalendar()" [disabled]="downloading()">
+    <ng-icon name="lucideCalendarArrowDown" />
+    {{ downloading() ? 'Preparing…' : 'Add to calendar' }}
+  </button>
+</app-page-header>
+
+<div
+  class="bg-muted mt-6 inline-flex gap-1 rounded-xl p-1"
+  role="tablist"
+  aria-label="Booking time"
+>
+  @for (t of tabs; track t.value) {
+    <button
+      type="button"
+      role="tab"
+      class="tab-btn"
+      [id]="'tab-' + t.value"
+      [attr.aria-selected]="tab() === t.value"
+      [attr.aria-controls]="'panel-' + t.value"
+      [attr.tabindex]="tab() === t.value ? 0 : -1"
+      (click)="setTab(t.value)"
+      (keydown.arrowRight)="setTab(t.value === 'active' ? 'past' : 'active', true)"
+      (keydown.arrowLeft)="setTab(t.value === 'active' ? 'past' : 'active', true)"
+    >
+      <span class="tab-label" [attr.data-text]="t.label"
+        ><span>{{ t.label }}</span></span
+      >
+    </button>
+  }
+</div>
+
+<section
+  class="surface-raised mt-4 p-5 sm:p-6"
+  role="tabpanel"
+  [id]="'panel-' + tab()"
+  [attr.aria-labelledby]="'tab-' + tab()"
+>
+  @if (items.error()) {
+    <app-error-state [error]="items.error()" (retry)="items.reload()" />
+  } @else if (!items.hasValue()) {
+    <app-list-skeleton [rows]="4" label="Loading bookings" />
+  } @else if (items.value().length === 0) {
+    @if (tab() === 'active') {
+      <app-empty-state
+        icon="lucideCalendarDays"
+        title="No upcoming bookings"
+        description="When you book a room or register for an event, it appears here."
+      >
+        <a hlmBtn routerLink="/facilities">Book a room</a>
+        <a hlmBtn variant="outline" routerLink="/events">Browse events</a>
+      </app-empty-state>
+    } @else {
+      <app-empty-state
+        icon="lucideHistory"
+        title="Nothing here yet"
+        description="Finished and cancelled bookings move here."
+      />
+    }
+  } @else {
+    <ul class="divide-border -my-4 divide-y" role="list">
+      @for (item of items.value(); track item.kind + item.id) {
+        <li>
+          <app-my-item-row [item]="item" [showStatus]="tab() === 'past'">
+            @if (canCancel(item)) {
+              <button
+                hlmBtn
+                variant="ghost"
+                size="sm"
+                class="text-destructive hover:bg-destructive-soft hover:text-destructive"
+                (click)="toCancel.set(item)"
+              >
+                Cancel<span class="sr-only">&nbsp;{{ item.title }}</span>
+              </button>
+            }
+          </app-my-item-row>
+        </li>
+      }
+    </ul>
+  }
+</section>
+
+<app-confirm-dialog
+  [open]="!!toCancel()"
+  (openChange)="!$event && toCancel.set(null)"
+  [title]="toCancel()?.kind === 'BOOKING' ? 'Cancel this booking?' : 'Cancel your registration?'"
+  [description]="cancelDescription()"
+  confirmLabel="Yes, cancel it"
+  cancelLabel="Keep it"
+  [destructive]="true"
+  [busy]="cancelling()"
+  (confirm)="cancel()"
+/>

@@ -8,13 +8,14 @@ export const routes: Routes = [
     path: 'login',
     canActivate: [guestGuard],
     title: 'Sign in · Smart Campus',
-    loadComponent: () => import('./features/auth/login-page').then((m) => m.LoginPage),
+    loadComponent: () => import('./features/auth/login-page/login-page').then((m) => m.LoginPage),
   },
   {
     path: 'register',
     canActivate: [guestGuard],
     title: 'Create account · Smart Campus',
-    loadComponent: () => import('./features/auth/register-page').then((m) => m.RegisterPage),
+    loadComponent: () =>
+      import('./features/auth/register-page/register-page').then((m) => m.RegisterPage),
   },
   {
     path: '',
@@ -25,41 +26,51 @@ export const routes: Routes = [
         path: '',
         title: 'Overview · Smart Campus',
         loadComponent: () =>
-          import('./features/dashboard/dashboard-page').then((m) => m.DashboardPage),
+          import('./features/dashboard/dashboard-page/dashboard-page').then((m) => m.DashboardPage),
       },
       {
         path: 'facilities',
         title: 'Facilities · Smart Campus',
         loadComponent: () =>
-          import('./features/facilities/facilities-page').then((m) => m.FacilitiesPage),
+          import('./features/facilities/facilities-page/facilities-page').then(
+            (m) => m.FacilitiesPage,
+          ),
       },
       {
         path: 'facilities/:id',
         title: 'Book a facility · Smart Campus',
         loadComponent: () =>
-          import('./features/facilities/facility-booking-page').then((m) => m.FacilityBookingPage),
+          import('./features/facilities/facility-booking-page/facility-booking-page').then(
+            (m) => m.FacilityBookingPage,
+          ),
       },
       {
         path: 'events',
         title: 'Events · Smart Campus',
-        loadComponent: () => import('./features/events/events-page').then((m) => m.EventsPage),
+        loadComponent: () =>
+          import('./features/events/events-page/events-page').then((m) => m.EventsPage),
       },
       {
         path: 'events/:id',
         title: 'Event · Smart Campus',
         loadComponent: () =>
-          import('./features/events/event-detail-page').then((m) => m.EventDetailPage),
+          import('./features/events/event-detail-page/event-detail-page').then(
+            (m) => m.EventDetailPage,
+          ),
       },
       {
         path: 'bookings',
         title: 'My bookings · Smart Campus',
         loadComponent: () =>
-          import('./features/bookings/my-bookings-page').then((m) => m.MyBookingsPage),
+          import('./features/bookings/my-bookings-page/my-bookings-page').then(
+            (m) => m.MyBookingsPage,
+          ),
       },
       {
         path: 'alerts',
         title: 'Alerts · Smart Campus',
-        loadComponent: () => import('./features/alerts/alerts-page').then((m) => m.AlertsPage),
+        loadComponent: () =>
+          import('./features/alerts/alerts-page/alerts-page').then((m) => m.AlertsPage),
       },
       {
         path: 'admin',
@@ -70,19 +81,25 @@ export const routes: Routes = [
             path: 'facilities',
             title: 'Manage facilities · Smart Campus',
             loadComponent: () =>
-              import('./features/admin/admin-facilities-page').then((m) => m.AdminFacilitiesPage),
+              import('./features/admin/admin-facilities-page/admin-facilities-page').then(
+                (m) => m.AdminFacilitiesPage,
+              ),
           },
           {
             path: 'events',
             title: 'Manage events · Smart Campus',
             loadComponent: () =>
-              import('./features/admin/admin-events-page').then((m) => m.AdminEventsPage),
+              import('./features/admin/admin-events-page/admin-events-page').then(
+                (m) => m.AdminEventsPage,
+              ),
           },
           {
             path: 'bookings',
             title: 'All bookings · Smart Campus',
             loadComponent: () =>
-              import('./features/admin/admin-bookings-page').then((m) => m.AdminBookingsPage),
+              import('./features/admin/admin-bookings-page/admin-bookings-page').then(
+                (m) => m.AdminBookingsPage,
+              ),
           },
         ],
       },

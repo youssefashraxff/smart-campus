@@ -1,0 +1,81 @@
+<hlm-dialog [state]="open() ? 'open' : 'closed'" (closed)="open.set(false)">
+  <hlm-dialog-content *brnDialogContent="let ctx" class="sm:max-w-lg">
+    <hlm-dialog-header>
+      <h2 hlmDialogTitle class="text-lg font-semibold">
+        {{ facility() ? 'Edit facility' : 'Add a facility' }}
+      </h2>
+      <p hlmDialogDescription class="text-muted-foreground text-sm">
+        Students see these details when they search and book.
+      </p>
+    </hlm-dialog-header>
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="save()"
+      class="flex flex-col gap-4"
+      novalidate
+      id="facility-form"
+    >
+      <app-form-field label="Name" for="f-title" [error]="error('title', 'Enter a name.')">
+        <input hlmInput id="f-title" formControlName="title" placeholder="Study Room A-305" />
+      </app-form-field>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <app-form-field
+          label="Building"
+          for="f-building"
+          [error]="error('building', 'Enter a building.')"
+        >
+          <input
+            hlmInput
+            id="f-building"
+            formControlName="building"
+            placeholder="FCIS Building A"
+          />
+        </app-form-field>
+        <app-form-field
+          label="Location"
+          for="f-location"
+          [error]="error('location', 'Enter where it is.')"
+        >
+          <input hlmInput id="f-location" formControlName="location" placeholder="3rd floor" />
+        </app-form-field>
+      </div>
+      <div class="grid gap-4 sm:grid-cols-3">
+        <app-form-field label="Type" for="f-type">
+          <select id="f-type" class="select-native" formControlName="type">
+            @for (t of types; track t.value) {
+              <option [value]="t.value">{{ t.label }}</option>
+            }
+          </select>
+        </app-form-field>
+        <app-form-field
+          label="Capacity"
+          for="f-capacity"
+          [error]="error('capacity', 'At least 1.')"
+        >
+          <input
+            hlmInput
+            id="f-capacity"
+            class="tabular"
+            type="number"
+            min="1"
+            formControlName="capacity"
+          />
+        </app-form-field>
+        <app-form-field label="Status" for="f-status">
+          <select id="f-status" class="select-native" formControlName="status">
+            <option value="Available">Available</option>
+            <option value="Maintenance">Maintenance</option>
+          </select>
+        </app-form-field>
+      </div>
+    </form>
+
+    <hlm-dialog-footer class="gap-2">
+      <button hlmBtn variant="outline" type="button" (click)="open.set(false)">Cancel</button>
+      <button hlmBtn type="submit" form="facility-form" [disabled]="busy()">
+        {{ busy() ? 'Saving…' : facility() ? 'Save changes' : 'Add facility' }}
+      </button>
+    </hlm-dialog-footer>
+  </hlm-dialog-content>
+</hlm-dialog>

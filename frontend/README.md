@@ -5,7 +5,7 @@ Angular 22 (standalone, signals, zoneless), Tailwind CSS 4, Spartan/ng (componen
 
 ```bash
 npm install
-npm start        # http://localhost:4200, talks to the gateway on http://localhost:5000
+npm start        # http://localhost:4200, talks to the gateway on http://localhost:5010
 npm run build
 ```
 
@@ -24,7 +24,7 @@ src/app/
     util/errors.ts     ProblemDetail -> readable message / per-field errors
   layout/              shell (sidebar on desktop, top bar + sheet on mobile), navigation
   shared/              page header, empty/error/loading states, status badge, rows, dialogs
-  features/
+  features/            one folder per component: <name>/<name>.ts, .html, .css
     auth/              login (FR-U2), register (FR-U1)
     dashboard/         GET /api/dashboard (FR-C3)
     facilities/        search (FR-U3), week calendar + booking form (FR-U5, FR-C3 availability)
