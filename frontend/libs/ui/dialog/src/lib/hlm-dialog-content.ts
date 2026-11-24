@@ -42,7 +42,7 @@ type HlmDialogContentContext = {
     }
 
     @if (showCloseButton()) {
-      <button hlmBtn variant="ghost" size="icon-sm" class="absolute end-2 top-2" hlmDialogClose>
+      <button hlmBtn variant="ghost" size="icon-sm" class="absolute end-4 top-4" hlmDialogClose>
         <span class="sr-only">{{ closeLabel() }}</span>
         <ng-icon name="lucideX" />
       </button>
@@ -70,7 +70,7 @@ export class HlmDialogContent {
 
   constructor() {
     classes(() => [
-      'bg-popover text-popover-foreground data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 ring-foreground/10 grid max-w-[calc(100%-2rem)] gap-4 rounded-xl p-4 text-sm ring-1 duration-100 sm:max-w-sm relative mx-auto w-[calc(100vw-2rem)] outline-none sm:mx-0',
+      'bg-popover text-popover-foreground data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 ring-foreground/10 grid max-w-[calc(100%-2rem)] gap-5 rounded-3xl p-6 text-sm ring-1 shadow-2xl duration-200 sm:max-w-md relative mx-auto w-[calc(100vw-2rem)] outline-none sm:mx-0',
       this._dynamicComponentClass,
     ]);
   }

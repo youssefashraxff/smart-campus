@@ -92,6 +92,6 @@ services/booking-engine/
 
 ## Status
 
-Skeleton only: modules, folders, ports, configuration, database scripts and the Angular + Tailwind + Spartan
-setup are in place; no feature code yet. Requirements are in `docs/SRS.md`, conventions for AI-assisted work in
+Backend: skeleton plus the features merged so far. Frontend: every page from SRS section 4 is built against the
+contracts in `frontend/README.md`; it works end to end as each backend endpoint lands. Requirements are in `docs/SRS.md`, conventions for AI-assisted work in
 `CLAUDE.md`, and the task backlog in ClickUp (space **Smart Campus**).

@@ -1,0 +1,265 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  numberAttribute,
+  signal,
+} from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideArrowLeft,
+  lucideCalendarClock,
+  lucideCircleCheck,
+  lucideClock,
+  lucideMapPin,
+  lucideTicket,
+  lucideUsers,
+} from '@ng-icons/lucide';
+import { toast } from '@spartan-ng/brain/sonner';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { BookingApi } from '../../core/api/booking.api';
+import { CatalogApi } from '../../core/api/catalog.api';
+import { errorMessage, problemOf, statusOf } from '../../core/util/errors';
+import { formatLongDay, formatTime, isFuture } from '../../core/util/time';
+import { ErrorState, ListSkeleton } from '../../shared/states';
+import { StatusBadge } from '../../shared/status-badge';
+
+/** An event with its speakers (FR-A3, FR-A4) and the Register action (FR-U6) */
+@Component({
+  selector: 'app-event-detail-page',
+  imports: [RouterLink, NgIcon, HlmButton, StatusBadge, ErrorState, ListSkeleton],
+  providers: [
+    provideIcons({
+      lucideArrowLeft,
+      lucideClock,
+      lucideMapPin,
+      lucideUsers,
+      lucideTicket,
+      lucideCircleCheck,
+      lucideCalendarClock,
+    }),
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <a
+      routerLink="/events"
+      class="text-muted-foreground hover:text-foreground -ms-1 inline-flex items-center gap-1.5 rounded-lg px-1 py-1 text-sm font-medium"
+    >
+      <ng-icon name="lucideArrowLeft" size="16" aria-hidden="true" /> All events
+    </a>
+
+    @if (event.error()) {
+      <div class="surface-raised mt-4">
+        <app-error-state
+          [error]="event.error()"
+          title="Couldn’t load this event"
+          (retry)="event.reload()"
+        />
+      </div>
+    } @else if (!event.hasValue()) {
+      <div class="surface-raised mt-4 p-4">
+        <app-list-skeleton [rows]="3" label="Loading event" />
+      </div>
+    } @else {
+      @let e = event.value();
+      <div class="mt-4 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <article class="surface-raised p-6 sm:p-8">
+          <div class="flex flex-wrap items-center gap-2">
+            <span
+              class="bg-brand-soft text-brand-ink rounded-full px-2.5 py-1 text-xs font-semibold"
+              >{{ e.category }}</span
+            >
+            @if (e.status !== 'Scheduled') {
+              <app-status-badge [status]="e.status" />
+            }
+          </div>
+          <h1 class="mt-3 text-[clamp(1.625rem,1.1rem+1.8vw,2.25rem)] font-semibold">
+            {{ e.title }}
+          </h1>
+
+          @if (e.status === 'Changed') {
+            <p
+              role="status"
+              class="bg-warning-soft text-warning mt-4 flex items-start gap-2.5 rounded-xl p-3.5 text-sm"
+            >
+              <ng-icon
+                name="lucideCalendarClock"
+                size="17"
+                class="mt-0.5 shrink-0"
+                aria-hidden="true"
+              />
+              The schedule changed. The time below is the new one, and registered students were
+              notified.
+            </p>
+          }
+
+          <dl class="mt-6 grid gap-4 sm:grid-cols-3">
+            <div class="flex gap-3">
+              <ng-icon
+                name="lucideClock"
+                size="18"
+                class="text-muted-foreground mt-0.5 shrink-0"
+                aria-hidden="true"
+              />
+              <div>
+                <dt class="text-muted-foreground text-xs">When</dt>
+                <dd class="text-sm font-medium">
+                  {{ day(e.startTime) }}<br /><span class="tabular"
+                    >{{ time(e.startTime) }}–{{ time(e.endTime) }}</span
+                  >
+                </dd>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <ng-icon
+                name="lucideMapPin"
+                size="18"
+                class="text-muted-foreground mt-0.5 shrink-0"
+                aria-hidden="true"
+              />
+              <div>
+                <dt class="text-muted-foreground text-xs">Where</dt>
+                <dd class="text-sm font-medium">{{ e.building }}<br />{{ e.location }}</dd>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <ng-icon
+                name="lucideUsers"
+                size="18"
+                class="text-muted-foreground mt-0.5 shrink-0"
+                aria-hidden="true"
+              />
+              <div>
+                <dt class="text-muted-foreground text-xs">Capacity</dt>
+                <dd class="tabular text-sm font-medium">{{ e.capacity }} seats</dd>
+              </div>
+            </div>
+          </dl>
+
+          <h2 class="mt-8 text-base font-semibold">About</h2>
+          <p class="text-foreground/85 mt-2 max-w-prose text-[0.9375rem] leading-relaxed">
+            {{ e.description }}
+          </p>
+
+          @if (e.speakers.length) {
+            <h2 class="mt-8 text-base font-semibold">
+              {{ e.speakers.length === 1 ? 'Speaker' : 'Speakers' }}
+            </h2>
+            <ul class="mt-3 grid gap-3 sm:grid-cols-2" role="list">
+              @for (s of e.speakers; track s.id) {
+                <li class="surface-flat flex gap-3 p-4">
+                  <span
+                    class="bg-brand-soft text-brand-ink grid size-10 shrink-0 place-items-center rounded-full text-sm font-semibold"
+                    aria-hidden="true"
+                    >{{ initials(s.name) }}</span
+                  >
+                  <div class="min-w-0">
+                    <p class="font-semibold">{{ s.name }}</p>
+                    <p class="text-muted-foreground text-xs">{{ s.affiliation }}</p>
+                    <p class="narrow mt-1.5 text-sm">{{ s.bio }}</p>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </article>
+
+        <aside class="surface-raised p-6 lg:sticky lg:top-8" aria-labelledby="register-title">
+          <h2 id="register-title" class="text-lg font-semibold">Registration</h2>
+          @if (registered()) {
+            <div role="status" class="mt-4 flex flex-col items-start gap-3">
+              <p class="text-success flex items-center gap-2 font-semibold">
+                <ng-icon name="lucideCircleCheck" size="18" aria-hidden="true" /> You’re registered
+              </p>
+              <p class="text-muted-foreground text-sm">
+                It’s in My bookings, and you’ll get a reminder before it starts.
+              </p>
+              <a hlmBtn variant="outline" routerLink="/bookings">View my bookings</a>
+            </div>
+          } @else if (closedReason(); as reason) {
+            <p class="text-muted-foreground mt-3 text-sm">{{ reason }}</p>
+          } @else {
+            <p class="text-muted-foreground mt-2 text-sm">
+              Free for FCIS students and staff. Seats are first come, first served.
+            </p>
+            @if (registerError()) {
+              <p
+                role="alert"
+                class="bg-destructive-soft text-destructive mt-4 rounded-xl px-3.5 py-2.5 text-sm"
+              >
+                {{ registerError() }}
+              </p>
+            }
+            <button hlmBtn size="lg" class="mt-5 w-full" (click)="register()" [disabled]="busy()">
+              <ng-icon name="lucideTicket" />
+              {{ busy() ? 'Registering…' : 'Register' }}
+            </button>
+          }
+        </aside>
+      </div>
+    }
+  `,
+})
+export class EventDetailPage {
+  private readonly catalog = inject(CatalogApi);
+  private readonly bookings = inject(BookingApi);
+
+  readonly id = input.required({ transform: numberAttribute });
+
+  protected readonly event = rxResource({
+    params: () => this.id(),
+    stream: ({ params }) => this.catalog.getEvent(params),
+  });
+  protected readonly busy = signal(false);
+  protected readonly registered = signal(false);
+  protected readonly registerError = signal<string | null>(null);
+
+  protected readonly closedReason = computed(() => {
+    if (!this.event.hasValue()) return null;
+    const e = this.event.value();
+    if (e.status === 'Cancelled') return 'This event was cancelled, so registration is closed.';
+    if (!isFuture(e.startTime)) return 'This event has already started, so registration is closed.';
+    return null;
+  });
+
+  protected readonly day = formatLongDay;
+  protected readonly time = formatTime;
+
+  protected initials(name: string): string {
+    return name
+      .split(' ')
+      .filter((p) => !/^(dr|eng|prof)\.?$/i.test(p))
+      .slice(0, 2)
+      .map((p) => p[0])
+      .join('');
+  }
+
+  protected register(): void {
+    this.busy.set(true);
+    this.registerError.set(null);
+    this.bookings.register(this.id()).subscribe({
+      next: () => {
+        this.busy.set(false);
+        this.registered.set(true);
+        toast.success('You’re registered', { description: this.event.value()?.title });
+      },
+      error: (err) => {
+        this.busy.set(false);
+        // 409 covers both "event full" and "already registered"; the server's detail says which
+        if (statusOf(err) === 409 && /already/i.test(problemOf(err)?.detail ?? '')) {
+          this.registered.set(true);
+          return;
+        }
+        this.registerError.set(
+          statusOf(err) === 409
+            ? (problemOf(err)?.detail ?? 'This event is full.')
+            : errorMessage(err),
+        );
+      },
+    });
+  }
+}

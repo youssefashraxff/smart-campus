@@ -30,6 +30,7 @@
     "rxjs": "~7.8.0",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.3.5",
+    "temporal-polyfill": "^1.0.8",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
