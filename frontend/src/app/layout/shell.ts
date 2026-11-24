@@ -27,7 +27,7 @@ import { Nav } from './nav';
 
     <div class="lg:grid lg:min-h-dvh lg:grid-cols-[16rem_1fr]">
       <!-- Desktop sidebar -->
-      <aside class="hidden lg:block">
+      <aside class="bg-sidebar border-sidebar-border hidden border-r lg:block">
         <div class="sticky top-0 flex h-dvh flex-col gap-8 px-4 py-6">
           <div class="px-1"><app-brand /></div>
           <app-nav class="flex-1" />
@@ -72,7 +72,7 @@ import { Nav } from './nav';
     </div>
 
     <hlm-sheet side="left" [state]="menuOpen() ? 'open' : 'closed'" (closed)="menuOpen.set(false)">
-      <hlm-sheet-content *brnSheetContent="let ctx" class="w-[17.5rem] gap-6 px-4 py-5">
+      <hlm-sheet-content *brnSheetContent="let ctx" class="bg-sidebar w-[17.5rem] gap-6 px-4 py-5">
         <div class="px-1 pt-0.5"><app-brand /></div>
         <app-nav class="flex-1" (navigate)="menuOpen.set(false)" />
       </hlm-sheet-content>

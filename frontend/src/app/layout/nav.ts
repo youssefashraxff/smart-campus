@@ -70,7 +70,7 @@ const ADMIN_NAV: NavItem[] = [
       @if (auth.isAdmin()) {
         <div>
           <p
-            class="text-muted-foreground mb-1.5 px-3 text-[0.6875rem] font-semibold tracking-wider uppercase"
+            class="text-sidebar-muted mb-1.5 px-3 text-[0.6875rem] font-semibold tracking-wider uppercase"
           >
             Administration
           </p>
@@ -86,7 +86,7 @@ const ADMIN_NAV: NavItem[] = [
     </nav>
 
     @if (auth.user(); as user) {
-      <div class="border-border mt-4 flex items-center gap-3 border-t pt-4">
+      <div class="border-sidebar-border mt-4 flex items-center gap-3 border-t pt-4">
         <span
           class="bg-brand-soft text-brand-ink grid size-9 shrink-0 place-items-center rounded-full text-xs font-semibold"
           aria-hidden="true"
@@ -94,11 +94,11 @@ const ADMIN_NAV: NavItem[] = [
         >
         <div class="min-w-0 flex-1">
           <p class="truncate text-sm font-medium" [title]="user.name">{{ user.name }}</p>
-          <p class="text-muted-foreground truncate text-xs">{{ user.role }}</p>
+          <p class="text-sidebar-muted truncate text-xs">{{ user.role }}</p>
         </div>
         <button
           type="button"
-          class="text-muted-foreground hover:bg-muted hover:text-foreground grid size-9 place-items-center rounded-xl transition-colors"
+          class="text-sidebar-muted hover:text-foreground grid size-9 hover:bg-white/45 place-items-center rounded-xl transition-colors"
           (click)="signOut()"
           aria-label="Sign out"
           title="Sign out"
@@ -116,7 +116,7 @@ const ADMIN_NAV: NavItem[] = [
         #rla="routerLinkActive"
         [attr.aria-current]="rla.isActive ? 'page' : null"
         (click)="navigate.emit()"
-        class="group text-muted-foreground hover:text-foreground flex h-10 items-center gap-3 rounded-xl px-3 text-sm transition-colors"
+        class="group text-sidebar-muted hover:text-foreground flex h-10 items-center gap-3 rounded-xl px-3 text-sm transition-colors hover:bg-white/45"
       >
         <ng-icon
           [name]="item.icon"

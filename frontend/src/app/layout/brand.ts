@@ -30,7 +30,7 @@ import { RouterLink } from '@angular/router';
       </span>
       <span class="leading-tight">
         <span class="block text-[0.9375rem] font-semibold tracking-tight">Smart Campus</span>
-        <span class="text-muted-foreground block text-[0.6875rem]"
+        <span class="text-sidebar-muted block text-[0.6875rem]"
           ><abbr
             class="[font-variant-caps:normal]"
             title="Faculty of Computer and Information Sciences"
