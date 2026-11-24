@@ -31,7 +31,7 @@
     },
     {
       "type": "java",
-      "name": "Gateway (5000)",
+      "name": "Gateway (5010)",
       "request": "launch",
       "mainClass": "com.smartcampus.gateway.GatewayApplication",
       "projectName": "gateway"
@@ -45,7 +45,7 @@
         "Facility Catalog (5002)",
         "Booking Engine (5003)",
         "Notification Service (5004)",
-        "Gateway (5000)"
+        "Gateway (5010)"
       ],
       "stopAll": true
     }
