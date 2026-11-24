@@ -8,22 +8,14 @@ import com.smartcampus.shared.contracts.EventResponse;
 import com.smartcampus.shared.exception.BadRequestException;
 import com.smartcampus.shared.exception.ConflictException;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-// Event registration rules (FR-U6). Not @Transactional on purpose: the HTTP calls to other services
-// happen before and after the transaction, never inside it.
+// Event registration (FR-U6) and cancelling it (FR-U8). Not @Transactional on purpose: the HTTP calls
+// to other services happen before and after the transaction, never inside it.
 @Service
 public class RegistrationService {
-
-    // Messages show campus time, whatever offset the catalog's JSON uses
-    private static final ZoneId CAMPUS_ZONE = ZoneId.of("Africa/Cairo");
-    private static final DateTimeFormatter START_FORMAT =
-            DateTimeFormatter.ofPattern("EEE d MMM, HH:mm", Locale.ENGLISH);
 
     private final CatalogClient catalogClient;
     private final RegistrationTransactions transactions;
@@ -51,10 +43,26 @@ public class RegistrationService {
 
         // 3. After the commit. Never throws (NFR-4)
         notificationClient.sendConfirmation(userId, "You are registered for \"" + event.title() + "\" on "
-                + event.startTime().atZoneSameInstant(CAMPUS_ZONE).format(START_FORMAT)
+                + CampusTime.format(event.startTime())
                 + ", " + event.location() + ".");
 
         return RegistrationResponse.from(saved);
+    }
+
+    public void cancel(Integer userId, Integer id) {
+        // 1. Exists, is the caller's and is active (404 / 409)
+        Registration registration = transactions.findOwnActive(userId, id);
+
+        // 2. A registration has no time of its own: it starts when its event starts
+        EventResponse event = catalogClient.getEvent(registration.getEventId());
+        if (!event.startTime().isAfter(OffsetDateTime.now())) {
+            throw new BadRequestException("Past registrations can't be cancelled");
+        }
+
+        // 3. The transaction, then the notification
+        transactions.cancel(userId, id);
+        notificationClient.sendCancellation(userId,
+                "Your registration for \"" + event.title() + "\" has been cancelled.");
     }
 
     // Turns the ways the database can reject a simultaneous registration into 409 instead of 500.

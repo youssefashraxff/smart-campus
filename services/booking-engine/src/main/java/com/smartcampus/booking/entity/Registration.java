@@ -45,6 +45,11 @@ public class Registration {
         this.status = RegistrationStatus.Registered;
     }
 
+    // Soft delete: the row stays, and ux_registrations_active ignores it, so the user can register again
+    public void cancel() {
+        this.status = RegistrationStatus.Cancelled;
+    }
+
     @PrePersist
     void onCreate() {
         if (createdAt == null) {
