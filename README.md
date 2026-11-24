@@ -66,6 +66,8 @@ services/booking-engine/
 1. **Database.** Create it once: `psql postgres`, then `CREATE DATABASE campusdb;`
 2. **Password.** In each service's `src/main/resources/`, copy `application-local.yml.example` to
    `application-local.yml` and put your Postgres password in it. That file is git-ignored.
+   Do the same in `gateway/src/main/resources/`. `jwt.secret` must be the same Base64 value in `auth-service`
+   (which signs the tokens) and `gateway` (which verifies them); make one with `openssl rand -base64 32`.
 3. **Build everything** from the repo root:
    ```bash
    mvn clean install

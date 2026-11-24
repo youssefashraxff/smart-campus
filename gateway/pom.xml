@@ -14,6 +14,11 @@
     <name>Gateway</name>
 
     <dependencies>
+        <!-- Spring Security + JWT validation (C#: Microsoft.AspNetCore.Authentication.JwtBearer) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
+        </dependency>
         <!-- Spring Cloud Gateway: forwards /api/** requests to the right service (C#: YARP) -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

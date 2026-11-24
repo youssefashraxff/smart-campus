@@ -2,14 +2,23 @@
 server:
   port: 5010
 
+# Verifies the tokens AuthService signs. Must be the same secret as in services/auth-service; the real
+# value goes in application-local.yml.
+jwt:
+  secret: CHANGE_ME
+
 spring:
   application:
     name: gateway
+  # Git-ignored; copy application-local.yml.example. Never commit the real secret.
+  config:
+    import: optional:classpath:application-local.yml
   cloud:
     gateway:
       server:
         webflux:
           # CORS for the Angular dev server (FR-C4, NFR-5). Only this origin may call the API from a browser.
+          # SecurityConfig reads these rules too, so that 401 and 403 answers also get the CORS headers.
           globalcors:
             # Also send the CORS headers when no route matches. Without them the browser hides the real
             # 404 and Angular only sees "status 0", which looks as if the gateway were down.
