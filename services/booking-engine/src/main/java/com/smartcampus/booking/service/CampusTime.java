@@ -12,6 +12,7 @@ final class CampusTime {
     private static final ZoneId ZONE = ZoneId.of("Africa/Cairo");
     private static final DateTimeFormatter FORMAT =
             DateTimeFormatter.ofPattern("EEE d MMM, HH:mm", Locale.ENGLISH);
+    private static final DateTimeFormatter TIME_ONLY = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
 
     private CampusTime() {
     }
@@ -25,5 +26,10 @@ final class CampusTime {
     // For notification messages, e.g. "Tue 1 Dec, 11:00"
     static String format(OffsetDateTime time) {
         return time.atZoneSameInstant(ZONE).format(FORMAT);
+    }
+
+    // Just the clock time, e.g. "12:30" (for the end of a booking in the same message)
+    static String formatTime(OffsetDateTime time) {
+        return time.atZoneSameInstant(ZONE).format(TIME_ONLY);
     }
 }

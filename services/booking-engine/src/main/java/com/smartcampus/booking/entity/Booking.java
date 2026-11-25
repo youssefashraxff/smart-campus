@@ -9,11 +9,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-// Maps the bookings table (V1__create_booking_tables.sql): one user reserving one facility.
+// Maps the bookings table (V1__create_booking_tables.sql, reminder_sent_at from V2): one user reserving
+// one facility.
 @Getter
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)   // JPA needs a no-args constructor
 @Table(name = "bookings")
 public class Booking {
 
@@ -38,9 +42,26 @@ public class Booking {
 
     private OffsetDateTime createdAt;
 
+    // When the 24-hour reminder went out (SRS 4.3.6); null = not sent yet. ReminderJob uses it so a
+    // booking is never reminded twice.
+    private OffsetDateTime reminderSentAt;
+
+    // A new booking is always Confirmed; createdAt is filled by onCreate()
+    public Booking(Integer userId, Integer facilityId, OffsetDateTime startTime, OffsetDateTime endTime) {
+        this.userId = userId;
+        this.facilityId = facilityId;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.status = BookingStatus.Confirmed;
+    }
+
     // Soft delete: the row stays so it still shows in the user's past items
     public void cancel() {
         this.status = BookingStatus.Cancelled;
+    }
+
+    public void markReminderSent(OffsetDateTime when) {
+        this.reminderSentAt = when;
     }
 
     @PrePersist

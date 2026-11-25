@@ -1,6 +1,7 @@
 package com.smartcampus.booking.repository;
 
 import com.smartcampus.booking.entity.Booking;
+import com.smartcampus.booking.entity.BookingStatus;
 import java.time.OffsetDateTime;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -24,5 +25,19 @@ public final class BookingSpecifications {
         return (booking, query, cb) -> cb.and(
                 cb.lessThan(booking.get("startTime"), dayEnd),
                 cb.greaterThan(booking.get("endTime"), dayStart));
+    }
+
+    // status = :status
+    public static Specification<Booking> hasStatus(BookingStatus status) {
+        return (booking, query, cb) -> cb.equal(booking.get("status"), status);
+    }
+
+    // start_time < :end AND end_time > :start  -> the booking shares at least one moment with [start, end).
+    // The overlap rule of SRS 4.3: 10:00-11:00 and 11:00-12:00 only touch, so they do NOT overlap.
+    // Used for the FR-U5 conflict check and the FR-C3 booked slots.
+    public static Specification<Booking> overlaps(OffsetDateTime start, OffsetDateTime end) {
+        return (booking, query, cb) -> cb.and(
+                cb.lessThan(booking.get("startTime"), end),
+                cb.greaterThan(booking.get("endTime"), start));
     }
 }

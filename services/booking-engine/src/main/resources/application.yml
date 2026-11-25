@@ -29,3 +29,8 @@ spring:
 services:
   catalog-url: http://localhost:5002
   notification-url: http://localhost:5004
+
+# SRS 4.3.6 reminders (ReminderJob). ISO-8601 durations: PT5M = 5 minutes, PT24H = 24 hours.
+reminders:
+  lead-time: PT24H
+  check-interval: PT5M
