@@ -121,3 +121,15 @@ questions from live data. It needs a free Groq API key:
 3. Run `ChatbotServiceApplication` (port 5005) next to the other services.
 
 Without a key the service still starts; `/api/chat` answers 503 "isn't configured yet". Details: `docs/spec.md` §9.
+
+## Hosted demo (Render)
+
+`render.yaml` is a Render Blueprint that deploys everything on free instances: Postgres (`campusdb`), the
+gateway, the five services (Docker images from `deploy/Dockerfile.*`) and the Angular app as a static site.
+Docker is used only there; local development stays native as described above.
+
+- Config comes from environment variables that override `application.yml` (e.g. `SERVER_PORT`,
+  `SPRING_DATASOURCE_*`, `SERVICES_CATALOGURL`, `JWT_SECRET`); the gateway's route URIs and CORS origin read
+  `${AUTH_SERVICE_URL:...}`, `${CORS_ALLOWED_ORIGINS:...}` etc., which default to the localhost values.
+- On the first deploy the gateway container loads `db/seed.sql` once all services have migrated (`deploy/start.sh`).
+- Free services sleep after 15 minutes idle; the first request afterwards can take a minute or two.
