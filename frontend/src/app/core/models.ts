@@ -187,3 +187,22 @@ export interface ProblemDetail {
   detail?: string;
   errors?: Record<string, string>;
 }
+
+// ---------- Campus Assistant (bonus, services/chatbot-service/.../dto) ----------
+
+/** ChatMessage.java. The server adds the system prompt and tool messages itself. */
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+/** ChatRequest.java: the conversation so far, oldest first, ending with the new question */
+export interface ChatRequest {
+  messages: ChatMessage[];
+}
+
+/** ChatResponse.java. toolsUsed: the lookups behind the answer, e.g. ['search_events'] */
+export interface ChatReply {
+  reply: string;
+  toolsUsed: string[];
+}

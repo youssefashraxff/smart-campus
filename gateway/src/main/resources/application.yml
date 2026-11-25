@@ -62,6 +62,12 @@ spring:
               predicates:
                 - Path=/api/notifications/**
 
+            # services/chatbot-service (port 5005): Campus Assistant (bonus, FR-B1..B3)
+            - id: chatbot-service
+              uri: http://localhost:5005
+              predicates:
+                - Path=/api/chat/**
+
           # Not routes: /api/dashboard and /api/facilities/{id}/availability are aggregated endpoints
           # (FR-C3) that the gateway answers itself in Java (package aggregation), by calling several services.
 

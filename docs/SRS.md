@@ -59,6 +59,7 @@ Angular (4200) ──HTTP + JWT──▶ API Gateway (5010) ──REST/JSON─�
 | FacilityCatalog | 5002 | Facilities, equipment, events, speakers, search |
 | BookingEngine | 5003 | Reservations, registrations, conflict checks, calendar export |
 | NotificationService | 5004 | Email and dashboard alerts, reminders |
+| ChatbotService (bonus) | 5005 | Campus Assistant: LLM (Groq) with read-only tool calls to the catalog and booking services |
 | Shared | — | Service names and contracts reused by services and gateway |
 
 Design decisions: one Maven module/process per service; gateway as BFF; synchronous REST between services;
@@ -191,4 +192,4 @@ FK and are validated through the owning service's API.
 ## 8. Bonus
 
 - **Creative UI (2 marks):** soft raised style — rounded controls, layered shadows on cards and primary actions, flatter tables/forms.
-- **Campus Assistant Chatbot (5 marks):** own service, `POST /api/chat`, LLM with tool calls to the availability and events endpoints (FR-B1 availability questions, FR-B2 event FAQs, FR-B3 service).
+- **Campus Assistant Chatbot (5 marks):** own service, `POST /api/chat`, LLM with tool calls to the availability and events endpoints (FR-B1 availability questions, FR-B2 event FAQs, FR-B3 service). Contract and tools: `spec.md` section 9.

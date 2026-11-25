@@ -26,6 +26,7 @@ and explain non-obvious decisions in your summary.
 | services/facility-catalog | 5002 | `com.smartcampus.catalog` | `flyway_history_catalog` |
 | services/booking-engine | 5003 | `com.smartcampus.booking` | `flyway_history_booking` |
 | services/notification-service | 5004 | `com.smartcampus.notification` | `flyway_history_notification` |
+| services/chatbot-service (bonus) | 5005 | `com.smartcampus.chatbot` | — (no database) |
 | shared | — | `com.smartcampus.shared` | — |
 
 Each service has `controller/`, `entity/` and `repository/` packages. Ports and DB settings are in each

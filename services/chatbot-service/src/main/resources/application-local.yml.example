@@ -1,0 +1,5 @@
+# Copy this file to application-local.yml (same folder) and put your Groq API key in it.
+# application-local.yml is git-ignored, so the key never reaches GitHub.
+# Free key: https://console.groq.com/keys
+groq:
+  api-key: gsk_your_key_here

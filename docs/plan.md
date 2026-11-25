@@ -79,3 +79,31 @@ Walk the UI as the student and the admin accounts; then move each ClickUp task t
 | Aggregation slows when one service hangs | 1 s connect / 2 s response timeout per call |
 | Duplicate reminders | `reminder_sent_at` stamped in a transaction before sending |
 | Lost notifications if a service is down at that moment | Accepted (best effort, NFR-4); an outbox is out of scope |
+
+---
+
+# Plan — bonus: Campus Assistant (branch `feat/campus-assistant`)
+
+1. **Module.** `services/chatbot-service` (port 5005, `com.smartcampus.chatbot`): pom with webmvc,
+   validation, shared; root `pom.xml` module; `application.yml` (`groq.*`, `services.*`) and
+   `application-local.yml.example` for the key.
+2. **LLM client.** `llm/`: `LlmMessage`, `ToolCall`, `ToolDefinition`, `CompletionRequest/Response`,
+   `GroqClient` (RestClient, 30 s read timeout, errors → 503).
+3. **Data clients.** `client/CatalogClient`, `BookingClient` (the same endpoints the gateway uses), `EventDetail`.
+4. **Tools.** `tools/CampusTool<A>` + `Schema`, `ToolArguments`; `SearchFacilitiesTool`,
+   `CheckAvailabilityTool`, `SearchEventsTool`, `EventDetailsTool`; `ToolRegistry` (all tools injected as a list).
+5. **Loop + API.** `service/SystemPrompt`, `ChatService` (max 5 rounds), `CampusTime`;
+   `controller/ChatController` with `ChatRequest/ChatMessage/ChatResponse`.
+6. **Gateway.** Route `/api/chat/**` → 5005 (authenticated by the default rule).
+7. **Frontend.** `ChatApi`, `AssistantStore`, `features/assistant/assistant.ts` (floating button + right sheet),
+   mounted in `Shell`.
+8. **Verify.** `mvn clean install`, `npx ng build`; with all services up ask: "Is Computer Lab 3 free tomorrow
+   at 14:00?", "Which study rooms fit 10 people?", "What events are on this week?", "Who is speaking at event X?",
+   then stop booking-engine and check the assistant says availability can't be checked.
+
+| Risk | Mitigation |
+| --- | --- |
+| Model invents facts or ids | Prompt rule + ids only from search tools + Java overlap check |
+| Free-tier rate limit (HTTP 429) | 503 "busy, try again in a minute"; history capped at 12 turns, results at 15 rows |
+| Prompt injection through event text | Tools are read-only; prompt marks tool output as data |
+| Model loops on tools | 5-round cap, then a forced text answer |

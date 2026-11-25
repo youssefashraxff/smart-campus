@@ -30,6 +30,7 @@
         <module>services/facility-catalog</module>
         <module>services/booking-engine</module>
         <module>services/notification-service</module>
+        <module>services/chatbot-service</module>
     </modules>
 
     <properties>

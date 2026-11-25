@@ -11,6 +11,7 @@ Angular (4200) ──HTTP──▶ API Gateway (5010) ──▶ Auth Service    
                          Spring Cloud Gateway   Facility Catalog      (5002)
                          routing                Booking Engine        (5003)
                                                 Notification Service  (5004)
+                                                Chatbot Service       (5005) ──▶ Groq LLM
                                                         │
                                                 PostgreSQL (campusdb)
 ```
@@ -22,6 +23,7 @@ Angular (4200) ──HTTP──▶ API Gateway (5010) ──▶ Auth Service    
 | `services/facility-catalog` | Facilities, equipment, events, speakers, search |
 | `services/booking-engine` | Reservations with overlap checks, event registrations |
 | `services/notification-service` | Email + dashboard alerts |
+| `services/chatbot-service` | Bonus: Campus Assistant (`POST /api/chat`), Groq LLM with read-only tools |
 | `shared` | Contracts and service names reused across services |
 | `frontend` | Angular 22 + Tailwind CSS 4 + Spartan/ng + FullCalendar |
 | `db` | `schema.sql` (reference) and `seed.sql` (initial FCIS data) |
@@ -107,3 +109,15 @@ Frontend: every page from SRS section 4 is built against the contracts in `front
 Alerts always appear on the dashboard. To also email them, fill the `spring.mail` block in
 `services/notification-service/src/main/resources/application-local.yml` (template in the `.example` next to it,
 e.g. a Gmail app password) and set `notifications.email.enabled: true`. With it off, the service logs the email instead.
+
+### Bonus: Campus Assistant chatbot
+
+A chat panel (the "Ask the assistant" button on every page) that answers facility availability and event
+questions from live data. It needs a free Groq API key:
+
+1. Create one at https://console.groq.com/keys.
+2. Copy `services/chatbot-service/src/main/resources/application-local.yml.example` to `application-local.yml`
+   and paste the key (or `export GROQ_API_KEY=gsk_...` before starting the service).
+3. Run `ChatbotServiceApplication` (port 5005) next to the other services.
+
+Without a key the service still starts; `/api/chat` answers 503 "isn't configured yet". Details: `docs/spec.md` §9.

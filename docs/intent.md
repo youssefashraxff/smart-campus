@@ -52,4 +52,28 @@ so the app works end to end on the seeded database.
 ## Out of scope
 
 Payments, SSO, push notifications, recurring bookings, waiting lists, an outbox/message broker for
-guaranteed delivery, and the bonus chatbot.
+guaranteed delivery. (The bonus chatbot was out of scope for this phase; it is the next phase, below.)
+
+---
+
+# Intent — bonus: Campus Assistant chatbot (FR-B1..B3)
+
+**Why.** SRS 8 gives 5 bonus marks for an assistant that answers availability questions (FR-B1) and event
+FAQs (FR-B2) from live data, built as its own service (FR-B3). It also shows the architecture paying off:
+a new consumer of the catalog and booking services, added without changing either of them.
+
+**Goal.** A signed-in user opens a chat panel on any page, asks "Is Computer Lab 3 free tomorrow at 2?" or
+"Who's speaking at the AI workshop?", and gets a short answer built only from facility, booking and event data.
+
+**Success.**
+1. `POST /api/chat` through the gateway answers both kinds of questions with the right facts from the seed data.
+2. The LLM never invents data: every fact comes from a tool call, and overlap checks run in Java, not in the model.
+3. The assistant is read-only: it can't book, cancel or see another user's data.
+4. If Groq is down, rate-limited or not configured, `/api/chat` is a 503 with a clear message and nothing else breaks.
+5. No new tables, no changes to the four existing services.
+
+**Choices.** Groq (free tier, OpenAI-compatible API, fast) with `openai/gpt-oss-120b`; called with a plain
+`RestClient` and a hand-written tool loop rather than a framework, so every step can be explained to a TA.
+Stateless service: the browser sends the recent conversation each time.
+
+**Out of scope.** Booking through the chat, streaming answers, chat history storage, per-user rate limiting.
