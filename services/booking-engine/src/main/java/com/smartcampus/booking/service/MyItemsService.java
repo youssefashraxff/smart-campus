@@ -1,13 +1,14 @@
 package com.smartcampus.booking.service;
 
 import com.smartcampus.booking.client.CatalogClient;
-import com.smartcampus.booking.dto.MyItemResponse;
 import com.smartcampus.booking.entity.Booking;
 import com.smartcampus.booking.entity.Registration;
 import com.smartcampus.booking.repository.BookingRepository;
 import com.smartcampus.booking.repository.RegistrationRepository;
 import com.smartcampus.shared.contracts.EventResponse;
 import com.smartcampus.shared.contracts.FacilityResponse;
+import com.smartcampus.shared.contracts.MyItemResponse;
+import com.smartcampus.shared.contracts.MyItemResponse.Kind;
 import com.smartcampus.shared.exception.BadRequestException;
 import com.smartcampus.shared.exception.NotFoundException;
 import java.time.OffsetDateTime;
@@ -59,6 +60,15 @@ public class MyItemsService {
                 .toList();
     }
 
+    // FR-U11: everything that really happens or happened, i.e. all items except cancelled ones,
+    // earliest first. A calendar keeps past entries, so past items stay in the export.
+    public List<MyItemResponse> listForCalendar(Integer userId) {
+        return loadItems(userId).stream()
+                .filter(item -> !item.status().equals("Cancelled"))
+                .sorted(Comparator.comparing(MyItemResponse::startTime))
+                .toList();
+    }
+
     private static boolean isActive(MyItemResponse item, OffsetDateTime now) {
         return !item.status().equals("Cancelled") && item.endTime().isAfter(now);
     }
@@ -76,18 +86,41 @@ public class MyItemsService {
         List<MyItemResponse> items = new ArrayList<>();
         for (Booking booking : bookings) {
             FacilityResponse facility = facilities.get(booking.getFacilityId());
-            items.add(facility == null
-                    ? MyItemResponse.withoutFacility(booking)
-                    : MyItemResponse.from(booking, facility));
+            items.add(facility == null ? withoutFacility(booking) : fromBooking(booking, facility));
         }
         for (Registration registration : registrations) {
             EventResponse event = events.get(registration.getEventId());
             // Without its event a registration has no times, so it can't be listed
             if (event != null) {
-                items.add(MyItemResponse.from(registration, event));
+                items.add(fromRegistration(registration, event));
             }
         }
         return items;
+    }
+
+    // Entity + catalog record -> the shared MyItemResponse contract. These used to be factory methods on
+    // the record; the record moved to shared (the gateway and the .ics reuse it) and shared can't know
+    // booking-engine's entities, so the mapping lives here, next to the only code that builds items.
+
+    // A booking has its own times; the facility gives it a name and a place
+    private static MyItemResponse fromBooking(Booking booking, FacilityResponse facility) {
+        return new MyItemResponse(Kind.BOOKING, booking.getId(),
+                facility.title(), facility.building(), facility.location(),
+                booking.getStartTime(), booking.getEndTime(), booking.getStatus().name());
+    }
+
+    // A facility the catalog no longer has: the booking still has its times, so it can still be listed
+    private static MyItemResponse withoutFacility(Booking booking) {
+        return new MyItemResponse(Kind.BOOKING, booking.getId(),
+                "Facility #" + booking.getFacilityId() + " (no longer listed)", "", "",
+                booking.getStartTime(), booking.getEndTime(), booking.getStatus().name());
+    }
+
+    // A registration has no times of its own: it starts and ends with its event
+    private static MyItemResponse fromRegistration(Registration registration, EventResponse event) {
+        return new MyItemResponse(Kind.REGISTRATION, registration.getId(),
+                event.title(), event.building(), event.location(),
+                event.startTime(), event.endTime(), registration.getStatus().name());
     }
 
     // id -> catalog record. An id the catalog no longer has (an admin deleted it) is left out of the map,

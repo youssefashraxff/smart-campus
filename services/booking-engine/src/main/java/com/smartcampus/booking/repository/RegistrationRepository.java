@@ -8,6 +8,8 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 // Database access for Registration. Spring Data writes the implementation at startup;
 // JpaRepository<Registration, Integer> already gives save, findById, findAll, deleteById, count, ...
@@ -26,4 +28,9 @@ public interface RegistrationRepository
     // simultaneous cancels the second waits and then sees the row is already Cancelled
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Registration> findWithLockById(Integer id);
+
+    // FR-A5: who to tell when an event moves or is cancelled. Only the user ids, not whole rows.
+    @Query("SELECT DISTINCT r.userId FROM Registration r WHERE r.eventId = :eventId AND r.status = :status")
+    List<Integer> findUserIdsByEventIdAndStatus(@Param("eventId") Integer eventId,
+                                                @Param("status") RegistrationStatus status);
 }

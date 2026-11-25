@@ -29,6 +29,10 @@ public class NotificationClient {
         send(new NotificationRequest(userId, "Cancellation", message));
     }
 
+    public void sendReminder(Integer userId, String message) {
+        send(new NotificationRequest(userId, "Reminder", message));
+    }
+
     private void send(NotificationRequest request) {
         try {
             restClient.post().uri("/api/notifications").body(request).retrieve().toBodilessEntity();

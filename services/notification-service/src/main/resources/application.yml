@@ -24,3 +24,15 @@ spring:
     # campusdb already has the other services' tables, so start the history from version 0
     baseline-on-migrate: true
     baseline-version: 0
+
+# auth-service owns the users' email addresses (AuthClient)
+services:
+  auth-url: http://localhost:5001
+
+# Email half of FR-U9 (EmailSender). Off by default: alerts are still saved, the email is only logged.
+# To send real mail, set enabled: true and the spring.mail settings in application-local.yml
+# (see application-local.yml.example).
+notifications:
+  email:
+    enabled: false
+    from: smart-campus@cis.asu.edu.eg

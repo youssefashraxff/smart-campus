@@ -24,5 +24,11 @@
             <artifactId>spring-webmvc</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- @JsonIgnoreProperties / @JsonProperty on the contracts. Jackson 3 still uses these
+             annotations (package com.fasterxml.jackson.annotation). No version: set by the root BOMs. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
     </dependencies>
 </project>

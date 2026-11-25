@@ -3,3 +3,19 @@
 spring:
   datasource:
     password: your-postgres-password
+
+# Optional: real email (FR-U9). Example for Gmail: create an "App password" (Google account ->
+# Security -> 2-Step Verification -> App passwords) and use it below, not your normal password.
+#  mail:
+#    host: smtp.gmail.com
+#    port: 587
+#    username: your.address@gmail.com
+#    password: your-16-char-app-password
+#    properties:
+#      mail.smtp.auth: true
+#      mail.smtp.starttls.enable: true
+#
+#notifications:
+#  email:
+#    enabled: true
+#    from: your.address@gmail.com
