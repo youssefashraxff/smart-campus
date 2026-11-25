@@ -51,6 +51,11 @@
             <groupId>com.smartcampus</groupId>
             <artifactId>shared</artifactId>
         </dependency>
+        <!-- JavaMailSender over SMTP for the email half of FR-U9 (C#: MailKit / SmtpClient) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
