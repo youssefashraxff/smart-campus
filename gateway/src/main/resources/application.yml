@@ -10,6 +10,10 @@ jwt:
 spring:
   application:
     name: gateway
+  # Spring's own errors in the aggregation controllers (e.g. a missing ?from=) as ProblemDetail JSON too
+  webflux:
+    problemdetails:
+      enabled: true
   # Git-ignored; copy application-local.yml.example. Never commit the real secret.
   config:
     import: optional:classpath:application-local.yml
@@ -59,4 +63,10 @@ spring:
                 - Path=/api/notifications/**
 
           # Not routes: /api/dashboard and /api/facilities/{id}/availability are aggregated endpoints
-          # (FR-C3) that the gateway answers itself in Java, by calling several services.
+          # (FR-C3) that the gateway answers itself in Java (package aggregation), by calling several services.
+
+# Where the aggregation controllers find the services (DownstreamClients). Same ports as the routes above.
+services:
+  catalog-url: http://localhost:5002
+  booking-url: http://localhost:5003
+  notification-url: http://localhost:5004

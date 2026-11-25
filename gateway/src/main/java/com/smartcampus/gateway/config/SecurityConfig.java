@@ -52,6 +52,10 @@ public class SecurityConfig {
                         // Public: you cannot have a token before you log in
                         .pathMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
 
+                        // Service-to-service endpoints (/internal/** on each service) are never for the
+                        // browser. No route forwards them anyway; this makes it explicit.
+                        .pathMatchers("/internal/**").denyAll()
+
                         // Internal: services call the Notification service directly on port 5004.
                         // Without this rule any user could send alerts and emails to other users.
                         .pathMatchers(HttpMethod.POST, "/api/notifications/**").denyAll()
