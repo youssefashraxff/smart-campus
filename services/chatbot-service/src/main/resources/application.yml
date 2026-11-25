@@ -1,0 +1,25 @@
+# Chatbot Service configuration (bonus: Campus Assistant, FR-B1..B3)
+server:
+  port: 5005
+
+spring:
+  application:
+    name: chatbot-service
+  # Your real Groq API key goes in application-local.yml next to this file
+  # (git-ignored; copy application-local.yml.example). Never commit it.
+  config:
+    import: optional:classpath:application-local.yml
+
+# The LLM. Groq exposes an OpenAI-compatible Chat Completions API, so switching to another
+# OpenAI-compatible provider only means changing base-url, api-key and model.
+groq:
+  base-url: https://api.groq.com/openai/v1
+  # Also read from the environment variable GROQ_API_KEY, so `export GROQ_API_KEY=...` works too
+  api-key: ${GROQ_API_KEY:CHANGE_ME}
+  # Any Groq model with tool use. Fallback if this one is slow or rate-limited: llama-3.3-70b-versatile
+  model: openai/gpt-oss-120b
+
+# Services the tools read from (same ports as the gateway routes)
+services:
+  catalog-url: http://localhost:5002
+  booking-url: http://localhost:5003

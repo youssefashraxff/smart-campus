@@ -92,3 +92,32 @@ gateway's route mapping, so `/api/facilities/{id}/availability` is answered by t
 `MyItemResponse` (moved from booking-engine, reused by the gateway and the .ics), `NotificationResponse`,
 `TimeSlot`, `UserContact`. Contracts that cross a service boundary ignore unknown JSON fields
 (tolerant reader), so adding a field on one side never breaks the other.
+
+## 9. Campus Assistant (bonus, FR-B1..B3) — chatbot-service (port 5005)
+
+**`POST /api/chat`** (any signed-in user; gateway route `/api/chat/**` → 5005)
+
+```json
+// request: the recent conversation, oldest first, ending with the user's question (1..20 messages)
+{ "messages": [ { "role": "user", "content": "Is Computer Lab 3 free tomorrow at 14:00?" } ] }
+// 200
+{ "reply": "No, it's booked 13:00-15:00 tomorrow. It's free from 15:00.",
+  "toolsUsed": ["search_facilities", "check_facility_availability"] }
+```
+
+`role` is `user` or `assistant`, `content` 1..2000 chars, last message must be `user` → otherwise 400.
+Groq down / rate-limited / key missing → 503 ProblemDetail. The service keeps no state and owns no tables.
+
+**Tool loop.** System prompt (rules + today's Cairo date) + history + tool definitions → Groq. If the answer
+has `tool_calls`, run each tool, append `{role: "tool", tool_call_id, content: <JSON>}`, call again; at most
+5 rounds, then one final call without tools. Tool errors (bad argument, unknown id, service down) are returned
+to the model as `{"error": "..."}`, never as an HTTP error.
+
+| Tool | Arguments | Reads | Returns |
+| --- | --- | --- | --- |
+| `search_facilities` | `q?`, `type?` (Room/Lab/Equipment), `building?` | catalog `GET /api/facilities` | first 15 facilities + total |
+| `check_facility_availability` | `facilityId`, `date`, `toDate?` (≤ 7 days), `startTime?`, `endTime?` (HH:mm, default +1 h) | catalog `GET /api/facilities/{id}` + *internal* booking `GET /internal/facilities/{id}/booked-slots` | facility, `bookable` (status = Available), booked slots in Cairo time, and for a requested time `{ free, inThePast, conflicts }` using the SRS 4.3 overlap rule |
+| `search_events` | `q?`, `category?`, `building?`, `from?`, `to?` | catalog `GET /api/events` | first 15 events (Cairo times, status) + total |
+| `get_event_details` | `eventId` | catalog `GET /api/events/{id}` + *internal* booking `GET /internal/events/{id}/registered-users` | event, speakers, `registered`, `placesLeft` (null if booking-engine is down) |
+
+All times given to the model are already Cairo local text (`Tue 2026-12-01 14:00`).

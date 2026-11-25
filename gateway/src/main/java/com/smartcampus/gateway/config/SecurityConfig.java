@@ -69,6 +69,8 @@ public class SecurityConfig {
                         // /api/bookings/calendar.ics are for every user.
                         .pathMatchers(HttpMethod.GET, "/api/bookings").hasRole(ADMIN)
 
+                        // POST /api/chat (bonus) is for every signed-in user: covered by the rule below
+
                         // Everything else needs a valid token, so a new route is protected by default
                         .anyExchange().authenticated())
 

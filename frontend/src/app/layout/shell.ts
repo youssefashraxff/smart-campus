@@ -5,6 +5,7 @@ import { lucideBell, lucideMenu } from '@ng-icons/lucide';
 import { BrnSheetContent } from '@spartan-ng/brain/sheet';
 import { HlmSheetImports } from '@spartan-ng/helm/sheet';
 import { AlertsStore } from '../core/alerts.store';
+import { Assistant } from '../features/assistant/assistant';
 import { Brand } from './brand';
 import { Nav } from './nav';
 
@@ -15,7 +16,16 @@ import { Nav } from './nav';
  */
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, NgIcon, HlmSheetImports, BrnSheetContent, Brand, Nav],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    NgIcon,
+    HlmSheetImports,
+    BrnSheetContent,
+    Brand,
+    Nav,
+    Assistant,
+  ],
   providers: [provideIcons({ lucideMenu, lucideBell })],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -77,6 +87,9 @@ import { Nav } from './nav';
         <app-nav class="flex-1" (navigate)="menuOpen.set(false)" />
       </hlm-sheet-content>
     </hlm-sheet>
+
+    <!-- Campus Assistant (bonus): floating button + chat panel on every signed-in page -->
+    <app-assistant />
   `,
 })
 export class Shell implements OnInit {
