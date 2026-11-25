@@ -94,6 +94,16 @@ services/booking-engine/
 
 ## Status
 
-Backend: skeleton plus the features merged so far. Frontend: every page from SRS section 4 is built against the
-contracts in `frontend/README.md`; it works end to end as each backend endpoint lands. Requirements are in `docs/SRS.md`, conventions for AI-assisted work in
-`CLAUDE.md`, and the task backlog in ClickUp (space **Smart Campus**).
+Backend: every endpoint in SRS section 5 is implemented, including the gateway aggregations (`/api/dashboard`,
+facility availability), notifications with optional SMTP email, 24-hour booking reminders and the `.ics` export.
+Frontend: every page from SRS section 4 is built against the contracts in `frontend/README.md`.
+
+- Requirements: `docs/SRS.md`
+- Why / what / done for the last phase: `docs/intent.md`, exact behaviour: `docs/spec.md`, build order: `docs/plan.md`
+- Conventions for AI-assisted work: `CLAUDE.md`; task backlog in ClickUp (space **Smart Campus**)
+
+### Optional: real email
+
+Alerts always appear on the dashboard. To also email them, fill the `spring.mail` block in
+`services/notification-service/src/main/resources/application-local.yml` (template in the `.example` next to it,
+e.g. a Gmail app password) and set `notifications.email.enabled: true`. With it off, the service logs the email instead.

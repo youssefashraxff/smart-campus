@@ -3,8 +3,8 @@
 University course project (Reusable Software Architecture). Requirements live in `docs/SRS.md`; every
 feature maps to an ID there (FR-A*, FR-U*, FR-C*, NFR-*). Read it before implementing anything.
 
-The repo is a skeleton: modules, folders, ports and configs exist, but there is no feature code yet.
-The student must be able to explain every line to a TA, so prefer clear, conventional code over clever code,
+All SRS 5 endpoints are implemented; `docs/intent.md`, `docs/spec.md` and `docs/plan.md` describe the last
+phase. The student must be able to explain every line to a TA, so prefer clear, conventional code over clever code,
 and explain non-obvious decisions in your summary.
 
 ## Stack
@@ -38,6 +38,8 @@ Each service has `controller/`, `entity/` and `repository/` packages. Ports and 
 - **Data ownership:** each service maps only its own tables and has its own Flyway history table (above).
   Cross-service IDs have no foreign keys; validate them by calling the owning service over HTTP
   (`http://localhost:<port>`).
+- **Service-to-service reads live under `/internal/**`** (e.g. `/internal/users/{id}`,
+  `/internal/facilities/{id}/booked-slots`). The gateway has no route for them and denies `/internal/**`.
 - **Schema changes go through Flyway only.** `ddl-auto` stays `validate`. Never edit a migration that has
   already run; add a new `V<n+1>__...sql` instead.
 - **Table/column names must match `db/schema.sql`**: snake_case (Hibernate default: field `startTime` →
