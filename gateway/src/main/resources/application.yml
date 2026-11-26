@@ -42,6 +42,8 @@ spring:
               args:
                 retries: 6
                 statuses: BAD_GATEWAY, SERVICE_UNAVAILABLE
+                series:            # empty = not every 5xx, only the statuses above
+                exceptions: java.net.ConnectException   # never resend after the service may have received it
                 methods: GET, POST, PUT, DELETE
                 backoff:
                   firstBackoff: 2s
