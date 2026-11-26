@@ -33,6 +33,22 @@ spring:
                 allowed-methods: GET, POST, PUT, DELETE, OPTIONS
                 allowed-headers: "*"
 
+          # Retry a request while the target service is still starting. On Render's free tier every service
+          # sleeps after 15 idle minutes, and while it wakes up (about a minute) Render answers 502/503 for it.
+          # Only those two statuses are retried, so a real error from a running service is returned at once.
+          # Backoff 2s, 4s, 8s, 16s, 20s, 20s = ~70s in total. Request bodies (e.g. login) are cached and resent.
+          default-filters:
+            - name: Retry
+              args:
+                retries: 6
+                statuses: BAD_GATEWAY, SERVICE_UNAVAILABLE
+                methods: GET, POST, PUT, DELETE
+                backoff:
+                  firstBackoff: 2s
+                  maxBackoff: 20s
+                  factor: 2
+                  basedOnPreviousValue: true
+
           # One route per service (FR-C2). The ports match server.port in each service's application.yml.
           # Paths are forwarded unchanged (no StripPrefix), so the services' controllers use the same
           # /api/... paths as SRS section 5, e.g. @RequestMapping("/api/bookings").
