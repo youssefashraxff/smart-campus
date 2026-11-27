@@ -73,7 +73,16 @@
 
     <hlm-dialog-footer class="gap-2">
       <button hlmBtn variant="outline" type="button" (click)="open.set(false)">Cancel</button>
-      <button hlmBtn type="submit" form="facility-form" [disabled]="busy()">
+      <button
+        hlmBtn
+        type="submit"
+        form="facility-form"
+        [disabled]="busy()"
+        [attr.aria-busy]="busy()"
+      >
+        @if (busy()) {
+          <app-spinner />
+        }
         {{ busy() ? 'Saving…' : facility() ? 'Save changes' : 'Add facility' }}
       </button>
     </hlm-dialog-footer>

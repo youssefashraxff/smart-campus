@@ -365,6 +365,11 @@
 [data-slot='button']:not([data-disabled]):active {
   transform: scale(0.97);
 }
+/* A button that is busy (spinner showing) is disabled against double submits, but it is working,
+   not unavailable: keep it at full strength instead of the faded disabled look */
+[data-slot='button'][aria-busy='true']:disabled {
+  opacity: 1;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,

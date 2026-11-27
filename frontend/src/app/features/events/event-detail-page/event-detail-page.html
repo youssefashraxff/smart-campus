@@ -146,8 +146,19 @@
             {{ registerError() }}
           </p>
         }
-        <button hlmBtn size="lg" class="mt-5 w-full" (click)="register()" [disabled]="busy()">
-          <ng-icon name="lucideTicket" />
+        <button
+          hlmBtn
+          size="lg"
+          class="mt-5 w-full"
+          (click)="register()"
+          [disabled]="busy()"
+          [attr.aria-busy]="busy()"
+        >
+          @if (busy()) {
+            <app-spinner />
+          } @else {
+            <ng-icon name="lucideTicket" />
+          }
           {{ busy() ? 'Registering…' : 'Register' }}
         </button>
       }

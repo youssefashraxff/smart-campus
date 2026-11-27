@@ -65,8 +65,10 @@
         @if (editingId()) {
           <button hlmBtn variant="ghost" type="button" (click)="resetForm()">Cancel edit</button>
         }
-        <button hlmBtn type="submit" [disabled]="form.invalid || busy()">
-          @if (!editingId()) {
+        <button hlmBtn type="submit" [disabled]="form.invalid || busy()" [attr.aria-busy]="busy()">
+          @if (busy()) {
+            <app-spinner />
+          } @else if (!editingId()) {
             <ng-icon name="lucidePlus" />
           }
           {{ busy() ? 'Saving…' : editingId() ? 'Save speaker' : 'Add speaker' }}

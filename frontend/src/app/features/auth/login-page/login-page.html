@@ -46,7 +46,17 @@
       </app-password-toggle>
     </app-form-field>
 
-    <button hlmBtn size="lg" type="submit" class="mt-2 w-full" [disabled]="busy()">
+    <button
+      hlmBtn
+      size="lg"
+      type="submit"
+      class="mt-2 w-full"
+      [disabled]="busy()"
+      [attr.aria-busy]="busy()"
+    >
+      @if (busy()) {
+        <app-spinner />
+      }
       {{ busy() ? 'Signing in…' : 'Sign in' }}
     </button>
   </form>

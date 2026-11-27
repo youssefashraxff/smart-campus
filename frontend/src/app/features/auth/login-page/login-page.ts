@@ -9,11 +9,13 @@ import { errorMessage, statusOf } from '../../../core/util/errors';
 import { FormField } from '../../../shared/form-field';
 import { AuthLayout } from '../auth-layout/auth-layout';
 import { PasswordToggle } from '../password-toggle/password-toggle';
+import { Spinner } from '../../../shared/spinner';
 
 /** FR-U2: sign in and receive the JWT used on every later request */
 @Component({
   selector: 'app-login-page',
   imports: [
+    Spinner,
     ReactiveFormsModule,
     RouterLink,
     HlmButton,

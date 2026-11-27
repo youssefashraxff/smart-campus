@@ -21,11 +21,13 @@ import { CampusEvent, Speaker } from '../../../core/models';
 import { errorMessage } from '../../../core/util/errors';
 import { FormField } from '../../../shared/form-field';
 import { ListSkeleton } from '../../../shared/states';
+import { Spinner } from '../../../shared/spinner';
 
 /** FR-A4: manage one event's speakers. List on top, add/edit form underneath. */
 @Component({
   selector: 'app-speakers-dialog',
   imports: [
+    Spinner,
     ReactiveFormsModule,
     NgIcon,
     HlmDialogImports,

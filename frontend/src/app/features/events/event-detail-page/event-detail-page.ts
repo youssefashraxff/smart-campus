@@ -27,11 +27,12 @@ import { errorMessage, problemOf, statusOf } from '../../../core/util/errors';
 import { formatLongDay, formatTime, isFuture } from '../../../core/util/time';
 import { ErrorState, ListSkeleton } from '../../../shared/states';
 import { StatusBadge } from '../../../shared/status-badge';
+import { Spinner } from '../../../shared/spinner';
 
 /** An event with its speakers (FR-A3, FR-A4) and the Register action (FR-U6) */
 @Component({
   selector: 'app-event-detail-page',
-  imports: [RouterLink, NgIcon, HlmButton, StatusBadge, ErrorState, ListSkeleton],
+  imports: [Spinner, RouterLink, NgIcon, HlmButton, StatusBadge, ErrorState, ListSkeleton],
   providers: [
     provideIcons({
       lucideArrowLeft,
