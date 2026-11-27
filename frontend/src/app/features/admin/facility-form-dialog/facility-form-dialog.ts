@@ -19,11 +19,13 @@ import { Facility, FacilityStatus, FacilityType } from '../../../core/models';
 import { errorMessage, fieldErrors } from '../../../core/util/errors';
 import { FACILITY_TYPES } from '../../../shared/facility-type';
 import { FormField } from '../../../shared/form-field';
+import { Spinner } from '../../../shared/spinner';
 
 /** Add or edit a facility (FR-A1). Setting status to Maintenance stops new bookings (FR-A2). */
 @Component({
   selector: 'app-facility-form-dialog',
   imports: [
+    Spinner,
     ReactiveFormsModule,
     HlmDialogImports,
     BrnDialogContent,

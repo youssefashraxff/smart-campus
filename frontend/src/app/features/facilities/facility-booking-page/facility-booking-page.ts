@@ -52,6 +52,7 @@ import { capacityLabel, facilityIcon } from '../../../shared/facility-type';
 import { FormField } from '../../../shared/form-field';
 import { ErrorState, ListSkeleton } from '../../../shared/states';
 import { StatusBadge } from '../../../shared/status-badge';
+import { Spinner } from '../../../shared/spinner';
 
 /** Bookable hours shown on the calendar and offered in the time menus */
 const OPEN = '08:00';
@@ -97,6 +98,7 @@ function defaultSlot(): { date: string; start: string; end: string } {
 @Component({
   selector: 'app-facility-booking-page',
   imports: [
+    Spinner,
     RouterLink,
     FullCalendarModule,
     NgIcon,

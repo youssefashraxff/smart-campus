@@ -1,0 +1,183 @@
+# Render Blueprint: deploys the whole Smart Campus platform (Dashboard > New > Blueprint).
+# Only for the hosted demo; local development still runs natively as described in README.md.
+#
+# Free web services can't receive private-network traffic, so the services call each other through
+# their public https://<name>.onrender.com URLs. Free services sleep after 15 minutes idle; the first
+# request after that wakes them (can take a minute or two per service).
+
+envVarGroups:
+  - name: smart-campus-secrets
+    envVars:
+      - key: JWT_SECRET          # shared by auth-service (signs) and gateway (verifies)
+        generateValue: true
+
+databases:
+  - name: smart-campus-db
+    plan: free
+    region: frankfurt
+    databaseName: campusdb
+    user: campus
+
+services:
+  # Angular frontend (static site, never sleeps)
+  - type: web
+    name: smart-campus-ya
+    runtime: static
+    rootDir: frontend
+    # 'render' swaps in src/environments/environment.render.ts (gateway URL + services to wake up)
+    buildCommand: npm ci && npx ng build --configuration production,render
+    staticPublishPath: dist/frontend/browser
+    buildFilter:
+      paths: [frontend/**]
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  - type: web
+    name: sc-ya-gateway
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./deploy/Dockerfile.gateway
+    dockerContext: .
+    buildFilter:
+      ignoredPaths: [frontend/**, docs/**]
+    envVars:
+      - fromGroup: smart-campus-secrets
+      - key: DB_HOST
+        fromDatabase: { name: smart-campus-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: smart-campus-db, property: port }
+      - key: DB_NAME
+        fromDatabase: { name: smart-campus-db, property: database }
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase: { name: smart-campus-db, property: user }
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase: { name: smart-campus-db, property: password }
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://smart-campus-ya.onrender.com
+      - key: AUTH_SERVICE_URL
+        value: https://sc-ya-auth.onrender.com
+      - key: CATALOG_SERVICE_URL
+        value: https://sc-ya-catalog.onrender.com
+      - key: BOOKING_SERVICE_URL
+        value: https://sc-ya-booking.onrender.com
+      - key: NOTIFICATION_SERVICE_URL
+        value: https://sc-ya-notify.onrender.com
+      - key: CHATBOT_SERVICE_URL
+        value: https://sc-ya-chatbot.onrender.com
+      - key: SEED_DATABASE
+        value: "true"
+
+  - type: web
+    name: sc-ya-auth
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./deploy/Dockerfile.auth
+    dockerContext: .
+    buildFilter:
+      ignoredPaths: [frontend/**, docs/**]
+    envVars:
+      - fromGroup: smart-campus-secrets
+      - key: DB_HOST
+        fromDatabase: { name: smart-campus-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: smart-campus-db, property: port }
+      - key: DB_NAME
+        fromDatabase: { name: smart-campus-db, property: database }
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase: { name: smart-campus-db, property: user }
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase: { name: smart-campus-db, property: password }
+
+  - type: web
+    name: sc-ya-catalog
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./deploy/Dockerfile.catalog
+    dockerContext: .
+    buildFilter:
+      ignoredPaths: [frontend/**, docs/**]
+    envVars:
+      - key: DB_HOST
+        fromDatabase: { name: smart-campus-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: smart-campus-db, property: port }
+      - key: DB_NAME
+        fromDatabase: { name: smart-campus-db, property: database }
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase: { name: smart-campus-db, property: user }
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase: { name: smart-campus-db, property: password }
+      - key: SERVICES_BOOKINGURL
+        value: https://sc-ya-booking.onrender.com
+      - key: SERVICES_NOTIFICATIONURL
+        value: https://sc-ya-notify.onrender.com
+
+  - type: web
+    name: sc-ya-booking
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./deploy/Dockerfile.booking
+    dockerContext: .
+    buildFilter:
+      ignoredPaths: [frontend/**, docs/**]
+    envVars:
+      - key: DB_HOST
+        fromDatabase: { name: smart-campus-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: smart-campus-db, property: port }
+      - key: DB_NAME
+        fromDatabase: { name: smart-campus-db, property: database }
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase: { name: smart-campus-db, property: user }
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase: { name: smart-campus-db, property: password }
+      - key: SERVICES_CATALOGURL
+        value: https://sc-ya-catalog.onrender.com
+      - key: SERVICES_NOTIFICATIONURL
+        value: https://sc-ya-notify.onrender.com
+
+  - type: web
+    name: sc-ya-notify
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./deploy/Dockerfile.notification
+    dockerContext: .
+    buildFilter:
+      ignoredPaths: [frontend/**, docs/**]
+    envVars:
+      - key: DB_HOST
+        fromDatabase: { name: smart-campus-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: smart-campus-db, property: port }
+      - key: DB_NAME
+        fromDatabase: { name: smart-campus-db, property: database }
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase: { name: smart-campus-db, property: user }
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase: { name: smart-campus-db, property: password }
+      - key: SERVICES_AUTHURL
+        value: https://sc-ya-auth.onrender.com
+
+  - type: web
+    name: sc-ya-chatbot
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./deploy/Dockerfile.chatbot
+    dockerContext: .
+    buildFilter:
+      ignoredPaths: [frontend/**, docs/**]
+    envVars:
+      - key: SERVICES_CATALOGURL
+        value: https://sc-ya-catalog.onrender.com
+      - key: SERVICES_BOOKINGURL
+        value: https://sc-ya-booking.onrender.com
+      - key: GROQ_API_KEY
+        sync: false   # asked for when the Blueprint is created

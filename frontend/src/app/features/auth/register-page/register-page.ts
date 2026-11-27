@@ -8,6 +8,7 @@ import { errorMessage, fieldErrors, statusOf } from '../../../core/util/errors';
 import { FormField } from '../../../shared/form-field';
 import { AuthLayout } from '../auth-layout/auth-layout';
 import { PasswordToggle } from '../password-toggle/password-toggle';
+import { Spinner } from '../../../shared/spinner';
 
 type Field = 'name' | 'universityId' | 'email' | 'password';
 
@@ -22,6 +23,7 @@ const MESSAGES: Record<Field, string> = {
 @Component({
   selector: 'app-register-page',
   imports: [
+    Spinner,
     ReactiveFormsModule,
     RouterLink,
     HlmButton,

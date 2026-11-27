@@ -1,0 +1,45 @@
+# Keeps the Render demo awake for a chosen number of hours (e.g. before a demo or a grading session).
+#
+# Why: free Render services sleep after 15 idle minutes and need about a minute to boot, so the first
+# visitor waits. Traffic from outside Render (like this GitHub runner) wakes them; pinging every
+# 10 minutes keeps them from falling asleep again.
+#
+# Run it from GitHub: Actions > Keep demo awake > Run workflow, then choose the hours.
+# Manual only on purpose: Render's free tier gives 750 instance-hours a month for the whole
+# workspace, and 6 services awake around the clock would use that up in about 5 days.
+name: Keep demo awake
+
+on:
+  workflow_dispatch:
+    inputs:
+      hours:
+        description: How many hours to keep the services awake (1-6)
+        required: true
+        default: '3'
+        type: choice
+        options: ['1', '2', '3', '4', '5', '6']
+
+jobs:
+  keep-warm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 370
+    steps:
+      - name: Ping every service every 10 minutes
+        env:
+          HOURS: ${{ inputs.hours }}
+        run: |
+          urls="https://sc-ya-gateway.onrender.com
+          https://sc-ya-auth.onrender.com
+          https://sc-ya-catalog.onrender.com
+          https://sc-ya-booking.onrender.com
+          https://sc-ya-notify.onrender.com
+          https://sc-ya-chatbot.onrender.com"
+          end=$(( $(date +%s) + HOURS * 3600 ))
+          while [ "$(date +%s)" -lt "$end" ]; do
+            for url in $urls; do
+              # Any HTTP answer (401/404 included) means the service is up; 502/503 means it is still booting
+              code=$(curl -s -o /dev/null -m 120 -w '%{http_code}' "$url/" || echo "000")
+              echo "$(date -u +%H:%M:%S) $url -> $code"
+            done
+            sleep 600
+          done

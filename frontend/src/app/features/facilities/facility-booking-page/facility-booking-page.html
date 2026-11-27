@@ -153,8 +153,19 @@
             </p>
           }
 
-          <button hlmBtn size="lg" type="submit" class="w-full" [disabled]="!!problem() || busy()">
-            <ng-icon name="lucideCalendarCheck" />
+          <button
+            hlmBtn
+            size="lg"
+            type="submit"
+            class="w-full"
+            [disabled]="!!problem() || busy()"
+            [attr.aria-busy]="busy()"
+          >
+            @if (busy()) {
+              <app-spinner />
+            } @else {
+              <ng-icon name="lucideCalendarCheck" />
+            }
             {{ busy() ? 'Booking…' : 'Book this slot' }}
           </button>
           <p class="text-muted-foreground text-xs">

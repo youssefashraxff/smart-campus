@@ -21,6 +21,7 @@ import { CampusEvent, EventStatus } from '../../../core/models';
 import { errorMessage, fieldErrors } from '../../../core/util/errors';
 import { campusToday, toCampusDate, toCampusIso, toCampusTime } from '../../../core/util/time';
 import { FormField } from '../../../shared/form-field';
+import { Spinner } from '../../../shared/spinner';
 
 /**
  * Add or edit an event (FR-A3). Changing the time or setting "Cancelled" makes the Facility Catalog
@@ -29,6 +30,7 @@ import { FormField } from '../../../shared/form-field';
 @Component({
   selector: 'app-event-form-dialog',
   imports: [
+    Spinner,
     ReactiveFormsModule,
     HlmDialogImports,
     BrnDialogContent,
