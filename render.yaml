@@ -24,10 +24,8 @@ services:
     name: smart-campus-ya
     runtime: static
     rootDir: frontend
-    buildCommand: >-
-      npm ci &&
-      sed -i "s#apiBaseUrl: '/api'#apiBaseUrl: 'https://sc-ya-gateway.onrender.com/api'#" src/environments/environment.ts &&
-      npx ng build
+    # 'render' swaps in src/environments/environment.render.ts (gateway URL + services to wake up)
+    buildCommand: npm ci && npx ng build --configuration production,render
     staticPublishPath: dist/frontend/browser
     buildFilter:
       paths: [frontend/**]
